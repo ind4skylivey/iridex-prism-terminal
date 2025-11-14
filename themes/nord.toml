@@ -1,0 +1,47 @@
+[metadata]
+name = "Nord"
+author = "ind4skylivey"
+version = "1.0.0"
+description = "Calm nordic palette"
+
+[colors]
+background = "#2e3440"
+foreground = "#d8dee9"
+black = "#3b4252"
+red = "#bf616a"
+green = "#a3be8c"
+yellow = "#ebcb8b"
+blue = "#81a1c1"
+magenta = "#b48ead"
+cyan = "#88c0d0"
+white = "#e5e9f0"
+
+[colors.bright]
+black = "#4c566a"
+red = "#d57780"
+green = "#b5d18a"
+yellow = "#f1d8a5"
+blue = "#95b1d9"
+magenta = "#c8a5c3"
+cyan = "#a3d5e4"
+white = "#eceff4"
+
+[prompt]
+style = "minimal"
+show_user = true
+show_host = true
+show_time = false
+show_git = true
+separator = ""
+
+[prompt.segments]
+user = { bg = "#3b4252", fg = "#d8dee9" }
+path = { bg = "#434c5e", fg = "#e5e9f0" }
+git  = { bg = "#4c566a", fg = "#d8dee9" }
+
+[widgets]
+enabled = ["git-status", "system", "clock"]
+
+[context_rules]
+night_theme = "dracula"
+project_themes.rust = "nord"

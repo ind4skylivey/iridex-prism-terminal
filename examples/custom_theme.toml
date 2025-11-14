@@ -1,0 +1,29 @@
+# Copy into ~/.config/prism/themes/mytheme.toml and tweak
+[metadata]
+name = "Custom"
+author = "you"
+version = "0.1.0"
+description = "Example custom theme"
+
+[colors]
+background = "#101010"
+foreground = "#f0f0f0"
+black = "#101010"
+red = "#ff5f5f"
+green = "#5fff87"
+yellow = "#ffd75f"
+blue = "#5f87ff"
+magenta = "#af5fff"
+cyan = "#5fffff"
+white = "#c6c6c6"
+
+[prompt]
+style = "minimal"
+show_user = true
+show_time = true
+show_git = true
+separator = ""
+
+[prompt.segments]
+user = { bg = "#5f87ff", fg = "#101010" }
+path = { bg = "#3a3a3a", fg = "#f0f0f0" }

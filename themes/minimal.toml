@@ -1,0 +1,45 @@
+[metadata]
+name = "Minimal"
+author = "ind4skylivey"
+version = "1.0.0"
+description = "Low-distraction minimal theme"
+
+[colors]
+background = "#000000"
+foreground = "#eaeaea"
+black = "#111111"
+red = "#ff5f5f"
+green = "#5fff87"
+yellow = "#ffd75f"
+blue = "#5fafff"
+magenta = "#af5fff"
+cyan = "#5fffff"
+white = "#c6c6c6"
+
+[colors.bright]
+black = "#333333"
+red = "#ff8787"
+green = "#87ffaf"
+yellow = "#ffe599"
+blue = "#87c0ff"
+magenta = "#c490ff"
+cyan = "#9fffff"
+white = "#ffffff"
+
+[prompt]
+style = "minimal"
+show_user = false
+show_host = false
+show_time = true
+show_git = true
+separator = "|"
+
+[prompt.segments]
+path = { bg = "#1c1c1c", fg = "#eaeaea" }
+git  = { bg = "#303030", fg = "#ffffff" }
+
+[widgets]
+enabled = ["clock"]
+
+[context_rules]
+on_high_load = "minimal"

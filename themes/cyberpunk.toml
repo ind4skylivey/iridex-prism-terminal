@@ -1,0 +1,50 @@
+[metadata]
+name = "Cyberpunk"
+author = "ind4skylivey"
+version = "1.0.0"
+description = "Neon cyberpunk vibe"
+
+[colors]
+background = "#0a0e27"
+foreground = "#e0e0e0"
+black = "#1a1a2e"
+red = "#ff006e"
+green = "#06ffa5"
+yellow = "#ffbe0b"
+blue = "#3a86ff"
+magenta = "#fb5607"
+cyan = "#8338ec"
+white = "#f0f0f0"
+
+[colors.bright]
+black = "#535353"
+red = "#ff1f8f"
+green = "#20ffb8"
+yellow = "#ffd60a"
+blue = "#5a9fff"
+magenta = "#ff6b35"
+cyan = "#a35fff"
+white = "#ffffff"
+
+[prompt]
+style = "powerline"
+show_user = true
+show_host = false
+show_time = true
+show_git = true
+separator = ""
+
+[prompt.segments]
+user = { bg = "#ff006e", fg = "#0a0e27", icon = "" }
+path = { bg = "#3a86ff", fg = "#ffffff", icon = "" }
+git  = { bg = "#06ffa5", fg = "#0a0e27", icon = "" }
+
+[widgets]
+enabled = ["git-status", "clock"]
+
+[context_rules]
+on_git_conflict = "danger-zone"
+on_high_load = "warning"
+night_theme = "tokyo-night"
+project_themes.rust = "cyberpunk"
+project_themes.javascript = "dracula"

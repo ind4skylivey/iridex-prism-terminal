@@ -1,0 +1,46 @@
+[metadata]
+name = "Dracula"
+author = "ind4skylivey"
+version = "1.0.0"
+description = "Classic Dracula theme"
+
+[colors]
+background = "#282a36"
+foreground = "#f8f8f2"
+black = "#21222c"
+red = "#ff5555"
+green = "#50fa7b"
+yellow = "#f1fa8c"
+blue = "#bd93f9"
+magenta = "#ff79c6"
+cyan = "#8be9fd"
+white = "#f8f8f2"
+
+[colors.bright]
+black = "#44475a"
+red = "#ff6e6e"
+green = "#69ff94"
+yellow = "#ffffa5"
+blue = "#d6acff"
+magenta = "#ff92df"
+cyan = "#a4ffff"
+white = "#ffffff"
+
+[prompt]
+style = "rich"
+show_user = true
+show_host = true
+show_time = true
+show_git = true
+separator = ""
+
+[prompt.segments]
+user = { bg = "#ff5555", fg = "#282a36" }
+path = { bg = "#6272a4", fg = "#f8f8f2" }
+git  = { bg = "#50fa7b", fg = "#282a36" }
+
+[widgets]
+enabled = ["git-status", "system", "clock", "docker"]
+
+[context_rules]
+on_git_conflict = "dracula"
