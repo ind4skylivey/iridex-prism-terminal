@@ -20,7 +20,7 @@
 - [x] Apply mechanism for Bash
 - [x] Apply mechanism for Fish
 - [x] Backup & rollback
-- [ ] Multi-shell tests
+- [x] Multi-shell tests
 
 ## Phase 2 – Context & Intelligence (Weeks 2-3)
 ### Sprint 2.1 – Context Detection
@@ -28,14 +28,14 @@
 - [x] Project type detector
 - [x] Time detection
 - [x] System load monitoring
-- [ ] Docker detection
+- [x] Docker detection
 
 ### Sprint 2.2 – Auto-Switching Logic
 - [x] Rule engine
-- [ ] Priority system
+- [x] Priority system
 - [x] Context-aware switching
-- [ ] `rules.toml`
-- [ ] Manual override
+- [x] `rules.toml`
+- [x] Manual override
 
 ### Sprint 2.3 – AI (Small Model)
 - [ ] Ollama integration
@@ -54,17 +54,17 @@
 
 ### Sprint 3.2 – Advanced Widgets
 - [x] Custom widget support
-- [ ] Widget configuration
+- [x] Widget configuration
 - [ ] Performance optimizations
 - [ ] Animation system
 - [ ] Plugin SDK
 
 ### Sprint 3.3 – Prompt Integration
-- [ ] Real-time prompt rendering
-- [ ] Widget streaming updates
-- [ ] Performance tuning
-- [ ] Caching
-- [ ] Battery optimization
+- [x] Real-time prompt rendering
+- [x] Widget streaming updates
+- [x] Performance tuning
+- [x] Caching
+- [x] Battery optimization
 
 ## Phase 4 – TUI & Preview (Weeks 4-5)
 ### Sprint 4.1 – Preview Interface
@@ -74,10 +74,10 @@
 - [x] Color picker
 
 ### Sprint 4.2 – Interactive Editor
-- [ ] Theme editor TUI
-- [ ] Real-time color adjustments
-- [ ] Segment customization
-- [ ] Save & apply from editor
+- [x] Theme editor TUI
+- [x] Real-time color adjustments
+- [x] Segment customization
+- [x] Save & apply from editor
 
 ### Sprint 4.3 – Theme Gallery
 - [ ] Browser TUI
@@ -88,20 +88,20 @@
 ## Phase 5 – Cloud Sync (Weeks 5-6)
 ### Sprint 5.1 – Sync Infrastructure
 - [x] API client
-- [ ] JWT auth
+- [x] JWT auth
 - [x] Local storage
-- [ ] Conflict resolution
+- [x] Conflict resolution
 
 ### Sprint 5.2 – Sync Operations
 - [x] Push
 - [x] Pull
 - [x] Status
-- [ ] History/versioning
-- [ ] Rollback
+- [x] History/versioning
+- [x] Rollback
 
 ### Sprint 5.3 – Dotfiles Manager
 - [x] Tracking
-- [ ] Selective sync
+- [x] Selective sync
 - [ ] Restore on new machine
 - [ ] Backup before restore
 - [ ] Exclusions
@@ -119,7 +119,7 @@
 - [x] Auto-switch daemon
 - [x] Widget updater
 - [x] IPC
-- [ ] Systemd integration
+- [x] Systemd integration
 
 ### Sprint 6.3 – Testing & Release
 - [ ] Unit tests

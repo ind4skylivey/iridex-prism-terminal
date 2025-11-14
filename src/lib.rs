@@ -3,6 +3,7 @@ pub mod context;
 pub mod core;
 pub mod daemon;
 pub mod error;
+pub mod prompt_stream;
 pub mod sync;
 pub mod tui;
 pub mod widgets;
@@ -16,6 +17,11 @@ pub const APP_NAME: &str = "prism";
 pub const BRAND_NAME: &str = "IRIDEX - Adaptive Terminal Iris System";
 
 pub fn ensure_config_dir() -> PrismResult<PathBuf> {
+    if let Ok(custom) = std::env::var("PRISM_CONFIG_DIR") {
+        let path = PathBuf::from(custom);
+        std::fs::create_dir_all(&path)?;
+        return Ok(path);
+    }
     let dir = config_dir()
         .ok_or_else(|| PrismError::new("could not resolve config directory"))?
         .join(APP_NAME);

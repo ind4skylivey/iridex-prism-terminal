@@ -2,17 +2,16 @@ use std::time::Duration;
 
 use colored::Colorize;
 
+use crate::context::ContextSnapshot;
 use crate::error::PrismResult;
 
 use super::widget::Widget;
 
-pub struct DockerWidget {
-    last_count: u32,
-}
+pub struct DockerWidget;
 
 impl DockerWidget {
     pub fn new() -> Self {
-        Self { last_count: 0 }
+        Self
     }
 }
 
@@ -32,12 +31,9 @@ impl Widget for DockerWidget {
         Duration::from_secs(2)
     }
 
-    async fn render(&mut self) -> PrismResult<String> {
-        let simulated = std::env::var("PRISM_DOCKER_COUNT")
-            .ok()
-            .and_then(|value| value.parse::<u32>().ok())
-            .unwrap_or(self.last_count);
-        self.last_count = simulated;
-        Ok(format!("Containers {simulated}").yellow().to_string())
+    async fn render(&mut self, snapshot: &ContextSnapshot) -> PrismResult<String> {
+        let running = snapshot.docker.running;
+        let total = snapshot.docker.total;
+        Ok(format!("Docker {running}/{total}").yellow().to_string())
     }
 }

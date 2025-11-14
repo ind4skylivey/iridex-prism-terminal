@@ -121,13 +121,15 @@ async fn handle_status(
     headers: HeaderMap,
 ) -> Result<Json<SyncStatus>, ApiError> {
     authenticate(&state, &headers)?;
-    let remote = state
+    let (remote_timestamp, remote_version) = state
         .current_snapshot()
         .await
-        .map(|snapshot| snapshot.timestamp);
+        .map(|snapshot| (Some(snapshot.timestamp), snapshot.version))
+        .unwrap_or((None, None));
     Ok(Json(SyncStatus {
         local_timestamp: Local::now().to_rfc3339(),
-        remote_timestamp: remote,
+        remote_timestamp,
+        remote_version,
     }))
 }
 
@@ -149,6 +151,7 @@ fn empty_snapshot() -> SyncData {
         config: serde_json::json!({}),
         dotfiles: Vec::new(),
         timestamp: Local::now().to_rfc3339(),
+        version: None,
     }
 }
 

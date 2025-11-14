@@ -116,6 +116,7 @@ fn sync_server_roundtrip() {
                     permissions: None,
                 }],
                 timestamp: Utc::now().to_rfc3339(),
+                version: None,
             };
 
             client.push(payload.clone()).await.expect("push");

@@ -1,9 +1,41 @@
+# Build artifacts
 target/
+**/target/
+dist/
+build/
+coverage/
+
+# Transient files
 **/*.rs.bk
 **/*.swp
-.idea/
-.vscode/
+**/*.tmp
+**/*.log
+**/*.bak
+**/*.old
+**/*.orig
+
+# Tooling caches
 .logs/
+.cache/
+.pytest_cache/
+.trunk/
+
+# Secrets and environment
 .env
 .env.*
+.envrc
+.env.local
+*.secret
+*.key
+*.pem
+*.pfx
+*.p12
+
+# Editors & IDEs
+.idea/
+.vscode/
+*.code-workspace
+
+# OS cruft
 .DS_Store
+Thumbs.db

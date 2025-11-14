@@ -3,6 +3,7 @@ use std::time::Duration;
 use colored::Colorize;
 use sysinfo::{CpuRefreshKind, MemoryRefreshKind, RefreshKind, System};
 
+use crate::context::ContextSnapshot;
 use crate::error::PrismResult;
 
 use super::widget::Widget;
@@ -38,7 +39,7 @@ impl Widget for SystemWidget {
         Duration::from_millis(750)
     }
 
-    async fn render(&mut self) -> PrismResult<String> {
+    async fn render(&mut self, _snapshot: &ContextSnapshot) -> PrismResult<String> {
         self.system.refresh_cpu();
         self.system.refresh_memory();
         let cpu = self.system.global_cpu_info().cpu_usage();

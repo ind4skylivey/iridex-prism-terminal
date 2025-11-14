@@ -1,44 +1,43 @@
 use super::{CliContext, WidgetArgs, WidgetCommands};
-use crate::error::{PrismError, PrismResult};
-use crate::widgets::storage::{self, WidgetSettings};
+use crate::error::PrismResult;
+use crate::widgets::storage;
 
 pub fn handle_widget(args: WidgetArgs, ctx: &CliContext) -> PrismResult<()> {
+    let mut widgets = storage::load_enabled(&ctx.config_dir)?;
     match args.command {
-        WidgetCommands::Add { name } => add_widget(ctx, &name),
-        WidgetCommands::Remove { name } => remove_widget(ctx, &name),
-        WidgetCommands::List => list_widgets(ctx),
-        WidgetCommands::Configure { name, key, value } => configure_widget(ctx, &name, key, value),
-    }
-}
-
-fn add_widget(ctx: &CliContext, name: &str) -> PrismResult<()> {
-    let mut widgets = storage::load_enabled(&ctx.config_dir)?;
-    if !widgets.iter().any(|w| w == name) {
-        widgets.push(name.to_string());
-        widgets.sort();
-        println!("Widget '{name}' enabled.");
-    }
-    storage::save_enabled(&ctx.config_dir, &widgets)
-}
-
-fn remove_widget(ctx: &CliContext, name: &str) -> PrismResult<()> {
-    let mut widgets = storage::load_enabled(&ctx.config_dir)?;
-    let original_len = widgets.len();
-    widgets.retain(|w| w != name);
-    if widgets.len() < original_len {
-        println!("Widget '{name}' removed.");
-    }
-    storage::save_enabled(&ctx.config_dir, &widgets)
-}
-
-fn list_widgets(ctx: &CliContext) -> PrismResult<()> {
-    let widgets = storage::load_enabled(&ctx.config_dir)?;
-    if widgets.is_empty() {
-        println!("No widgets enabled yet.");
-    } else {
-        println!("Enabled widgets:");
-        for widget in widgets {
-            println!("- {widget}");
+        WidgetCommands::Add { name } => {
+            if !widgets.contains(&name) {
+                widgets.push(name.clone());
+                widgets.sort();
+                println!("Widget '{name}' enabled.");
+                storage::save_enabled(&ctx.config_dir, &widgets)?;
+            } else {
+                println!("Widget '{name}' is already enabled.");
+            }
+        }
+        WidgetCommands::Remove { name } => {
+            let initial_len = widgets.len();
+            widgets.retain(|w| w != &name);
+            if widgets.len() != initial_len {
+                storage::save_enabled(&ctx.config_dir, &widgets)?;
+                println!("Widget '{name}' removed.");
+            } else {
+                println!("Widget '{name}' was not enabled.");
+            }
+        }
+        WidgetCommands::List => {
+            if widgets.is_empty() {
+                println!("No widgets enabled yet.");
+            } else {
+                widgets.sort();
+                println!("Enabled widgets:");
+                for widget in &widgets {
+                    println!("- {widget}");
+                }
+            }
+        }
+        WidgetCommands::Configure { name, key, value } => {
+            configure_widget(ctx, &name, key, value)?;
         }
     }
     Ok(())
@@ -50,31 +49,47 @@ fn configure_widget(
     key: Option<String>,
     value: Option<String>,
 ) -> PrismResult<()> {
+    let mut config = storage::load_settings(&ctx.config_dir)?;
     match (key, value) {
-        (Some(k), Some(v)) => {
-            storage::upsert_setting(&ctx.config_dir, name, &k, &v)?;
-            println!("Set {name}.{k} = {v}");
-            Ok(())
+        (Some(key), Some(value)) => {
+            let entry = config
+                .entry(name.to_string())
+                .or_insert_with(Default::default);
+            entry.insert(key.clone(), value.clone());
+            println!("Set {name}.{key} = {value}");
+            storage::save_settings(&ctx.config_dir, &config)?;
         }
-        (Some(_), None) | (None, Some(_)) => Err(PrismError::new(
-            "Provide both --key and --value to configure a widget setting.",
-        )),
-        (None, None) => {
-            let settings = storage::load_settings(&ctx.config_dir)?;
-            show_widget_settings(name, &settings);
-            Ok(())
+        (Some(key), None) => {
+            let mut remove_entry = false;
+            if let Some(entry) = config.get_mut(name) {
+                if entry.remove(&key).is_some() {
+                    println!("Removed {name}.{key}");
+                } else {
+                    println!("{name}.{key} was not set");
+                }
+                remove_entry = entry.is_empty();
+            } else {
+                println!("No configuration stored for '{name}'.");
+            }
+            if remove_entry {
+                config.remove(name);
+            }
+            storage::save_settings(&ctx.config_dir, &config)?;
         }
-    }
-}
-
-fn show_widget_settings(name: &str, settings: &WidgetSettings) {
-    match settings.get(name) {
-        Some(entries) if !entries.is_empty() => {
-            println!("Settings for '{name}':");
-            for (key, value) in entries {
-                println!("- {key} = {value}");
+        _ => {
+            if let Some(entry) = config.get(name) {
+                if entry.is_empty() {
+                    println!("No configuration stored for '{name}'.");
+                } else {
+                    println!("Settings for {name}:");
+                    for (key, value) in entry {
+                        println!("- {key} = {value}");
+                    }
+                }
+            } else {
+                println!("No configuration stored for '{name}'.");
             }
         }
-        _ => println!("No settings stored for '{name}'."),
     }
+    Ok(())
 }

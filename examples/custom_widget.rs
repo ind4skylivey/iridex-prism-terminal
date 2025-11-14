@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use prism::context::ContextSnapshot;
 use prism::error::PrismResult;
 use prism::widgets::Widget;
 
@@ -15,7 +16,7 @@ impl Widget for BatteryWidget {
         Duration::from_secs(1)
     }
 
-    async fn render(&mut self) -> PrismResult<String> {
+    async fn render(&mut self, _snapshot: &ContextSnapshot) -> PrismResult<String> {
         Ok("🔋 95%".into())
     }
 }
@@ -28,6 +29,6 @@ async fn main() -> PrismResult<()> {
         widget.name(),
         widget.refresh_interval()
     );
-    println!("{}", widget.render().await?);
+    println!("{}", widget.render(&ContextSnapshot::default()).await?);
     Ok(())
 }

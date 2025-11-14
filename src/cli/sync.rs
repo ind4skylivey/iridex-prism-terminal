@@ -266,6 +266,7 @@ fn build_snapshot() -> PrismResult<SyncData> {
         }),
         dotfiles,
         timestamp: chrono::Local::now().to_rfc3339(),
+        version: None,
     })
 }
 

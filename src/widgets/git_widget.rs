@@ -2,19 +2,24 @@ use std::time::Duration;
 
 use colored::Colorize;
 
-use crate::context::git::GitContext;
+use crate::context::ContextSnapshot;
 use crate::error::PrismResult;
 
 use super::widget::Widget;
 
 pub struct GitStatusWidget {
-    context: GitContext,
     frame: usize,
 }
 
 impl GitStatusWidget {
-    pub fn new(context: GitContext) -> Self {
-        Self { context, frame: 0 }
+    pub fn new() -> Self {
+        Self { frame: 0 }
+    }
+}
+
+impl Default for GitStatusWidget {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -28,12 +33,12 @@ impl Widget for GitStatusWidget {
         Duration::from_millis(500)
     }
 
-    async fn render(&mut self) -> PrismResult<String> {
+    async fn render(&mut self, snapshot: &ContextSnapshot) -> PrismResult<String> {
         let frames = ["", ""];
         let frame = frames[self.frame % frames.len()];
         self.frame = (self.frame + 1) % frames.len();
-        let branch = self
-            .context
+        let branch = snapshot
+            .git
             .branch
             .clone()
             .unwrap_or_else(|| "detached".into());
@@ -41,7 +46,7 @@ impl Widget for GitStatusWidget {
             "{} {} {}",
             frame,
             branch.bold(),
-            if self.context.dirty {
+            if snapshot.git.dirty {
                 "±".red()
             } else {
                 "✓".green()

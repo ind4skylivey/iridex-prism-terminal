@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use crate::context::docker::{self, DockerContext};
 use crate::context::git::{self, GitContext};
 use crate::context::project::{self, ProjectContext};
 use crate::context::rules::RuleEngine;
@@ -14,19 +15,18 @@ pub struct ContextSnapshot {
     pub project: ProjectContext,
     pub time: TimeContext,
     pub system: SystemContext,
+    pub docker: DockerContext,
     pub suggested_theme: Option<String>,
 }
 
 pub struct ContextDetector {
     rules: RuleEngine,
-    manual_override: Option<RuleEngine>,
 }
 
 impl ContextDetector {
-    pub fn new(rules: Option<ContextRules>, manual_override: Option<ContextRules>) -> Self {
+    pub fn new(rules: ContextRules, manual_override: Option<String>) -> Self {
         Self {
-            rules: RuleEngine::new(rules.unwrap_or_default()),
-            manual_override: manual_override.map(RuleEngine::new),
+            rules: RuleEngine::new(rules, manual_override),
         }
     }
 
@@ -35,17 +35,21 @@ impl ContextDetector {
         let project = project::detect_project_context(path);
         let time_ctx = time::detect_time_context();
         let system_ctx = system::detect_system_context().unwrap_or_default();
+        let docker_ctx = docker::detect_docker_context();
 
         let snapshot = ContextSnapshot {
             git: git.clone(),
             project: project.clone(),
             time: time_ctx.clone(),
             system: system_ctx.clone(),
-            suggested_theme: self
-                .manual_override
-                .as_ref()
-                .and_then(|engine| engine.evaluate(&git, &project, &time_ctx, &system_ctx))
-                .or_else(|| self.rules.evaluate(&git, &project, &time_ctx, &system_ctx)),
+            docker: docker_ctx.clone(),
+            suggested_theme: self.rules.evaluate(
+                &git,
+                &project,
+                &time_ctx,
+                &system_ctx,
+                &docker_ctx,
+            ),
         };
 
         Ok(snapshot)
@@ -55,11 +59,12 @@ impl ContextDetector {
 impl ContextSnapshot {
     pub fn summary(&self) -> String {
         format!(
-            "git: {} | project: {} | time: {} | load: {:.2}%",
+            "git: {} | project: {} | time: {} | load: {:.2}% | containers: {}",
             self.git.branch.as_deref().unwrap_or("-"),
             self.project.language.as_deref().unwrap_or("unknown"),
             self.time.period,
-            self.system.load_percent
+            self.system.load_percent,
+            self.docker.running
         )
     }
 }

@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use async_trait::async_trait;
 
+use crate::context::ContextSnapshot;
 use crate::error::PrismResult;
 
 #[async_trait]
@@ -13,5 +14,5 @@ pub trait Widget: Send + Sync {
     fn is_enabled(&self) -> bool {
         true
     }
-    async fn render(&mut self) -> PrismResult<String>;
+    async fn render(&mut self, snapshot: &ContextSnapshot) -> PrismResult<String>;
 }

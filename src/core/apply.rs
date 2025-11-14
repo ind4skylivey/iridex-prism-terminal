@@ -38,12 +38,14 @@ pub fn apply_theme(theme: &Theme, shell: Shell, config_dir: &Path) -> PrismResul
     let script_path = config_dir.join(format!("prism.{}", shell.extension()));
     backup_if_exists(&script_path)?;
     let script = match shell {
-        Shell::Zsh => prompt::generate_zsh(theme),
-        Shell::Bash => prompt::generate_bash(theme),
-        Shell::Fish => prompt::generate_fish(theme),
+        Shell::Zsh => prompt::generate_zsh(theme, config_dir),
+        Shell::Bash => prompt::generate_bash(theme, config_dir),
+        Shell::Fish => prompt::generate_fish(theme, config_dir),
     };
     fs::write(&script_path, script)?;
-    ensure_shell_hook(shell, &script_path)?;
+    if std::env::var("PRISM_DISABLE_SHELL_HOOKS").is_err() {
+        ensure_shell_hook(shell, &script_path)?;
+    }
     Ok(script_path)
 }
 

@@ -13,6 +13,8 @@ pub struct SyncData {
     pub config: serde_json::Value,
     pub dotfiles: Vec<DotfileRecord>,
     pub timestamp: String,
+    #[serde(default)]
+    pub version: Option<u64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -34,6 +36,20 @@ pub struct DotfileRecord {
 pub struct SyncStatus {
     pub local_timestamp: String,
     pub remote_timestamp: Option<String>,
+    #[serde(default)]
+    pub remote_version: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SyncPushRequest {
+    pub base_version: Option<u64>,
+    pub payload: SyncData,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SyncPushResponse {
+    pub version: u64,
+    pub timestamp: String,
 }
 
 #[derive(Clone)]
@@ -96,16 +112,17 @@ impl SyncClient {
             .with_auth(self.http.get(format!("{}/status", self.endpoint)))
             .send()
             .await;
-        let remote_timestamp = match resp {
+        let (remote_timestamp, remote_version) = match resp {
             Ok(response) => match response.json::<SyncStatus>().await {
-                Ok(status) => status.remote_timestamp,
-                Err(_) => None,
+                Ok(status) => (status.remote_timestamp, status.remote_version),
+                Err(_) => (None, None),
             },
-            Err(_) => None,
+            Err(_) => (None, None),
         };
         Ok(SyncStatus {
             local_timestamp: Local::now().to_rfc3339(),
             remote_timestamp,
+            remote_version,
         })
     }
 
@@ -115,6 +132,7 @@ impl SyncClient {
             config: serde_json::json!({}),
             dotfiles: Vec::new(),
             timestamp: Local::now().to_rfc3339(),
+            version: None,
         }
     }
 

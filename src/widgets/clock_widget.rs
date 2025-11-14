@@ -3,6 +3,7 @@ use std::time::{Duration, SystemTime};
 use chrono::Local;
 use colored::Colorize;
 
+use crate::context::ContextSnapshot;
 use crate::error::PrismResult;
 
 use super::widget::Widget;
@@ -35,7 +36,7 @@ impl Widget for ClockWidget {
         Duration::from_millis(1000)
     }
 
-    async fn render(&mut self) -> PrismResult<String> {
+    async fn render(&mut self, _snapshot: &ContextSnapshot) -> PrismResult<String> {
         let now = Local::now();
         let formatted = now.format("%Y-%m-%d %H:%M:%S").to_string();
         let pulse = if self

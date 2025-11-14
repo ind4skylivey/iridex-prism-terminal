@@ -26,7 +26,8 @@ pub struct Theme {
 impl Theme {
     pub fn load(path: &Path) -> PrismResult<Self> {
         let raw = fs::read_to_string(path)?;
-        let theme: Theme = toml::from_str(&raw)?;
+        let mut theme: Theme = toml::from_str(&raw)?;
+        theme.normalize();
         theme.validate()?;
         Ok(theme)
     }
@@ -47,6 +48,10 @@ impl Theme {
         self.colors.validate()?;
         self.prompt.validate()?;
         Ok(())
+    }
+
+    fn normalize(&mut self) {
+        self.prompt.ensure_segment_order();
     }
 }
 
@@ -92,6 +97,8 @@ pub struct PromptConfig {
     pub separator: String,
     #[serde(default)]
     pub segments: BTreeMap<String, PromptSegment>,
+    #[serde(default)]
+    pub segment_order: Vec<String>,
 }
 
 impl Default for PromptConfig {
@@ -104,6 +111,7 @@ impl Default for PromptConfig {
             show_git: true,
             separator: default_separator(),
             segments: BTreeMap::new(),
+            segment_order: Vec::new(),
         }
     }
 }
@@ -114,6 +122,48 @@ impl PromptConfig {
             return Err(PrismError::new("prompt separator cannot be empty"));
         }
         Ok(())
+    }
+
+    pub fn ensure_segment_order(&mut self) {
+        if self.segment_order.is_empty() {
+            self.segment_order = self.segments.keys().cloned().collect();
+        }
+        self.segment_order
+            .retain(|name| self.segments.contains_key(name));
+        for key in self.segments.keys() {
+            if !self.segment_order.contains(key) {
+                self.segment_order.push(key.clone());
+            }
+        }
+    }
+
+    pub fn ordered_segments(&self) -> Vec<(String, PromptSegment)> {
+        let mut ordered = Vec::new();
+        for name in &self.segment_order {
+            if let Some(segment) = self.segments.get(name) {
+                ordered.push((name.clone(), segment.clone()));
+            }
+        }
+        ordered
+    }
+
+    pub fn move_segment(&mut self, name: &str, delta: isize) -> bool {
+        let mut moved = false;
+        if let Some(idx) = self.segment_order.iter().position(|value| value == name) {
+            let len = self.segment_order.len() as isize;
+            let mut new_idx = idx as isize + delta;
+            if new_idx < 0 {
+                new_idx = 0;
+            } else if new_idx >= len {
+                new_idx = len - 1;
+            }
+            if new_idx != idx as isize {
+                let value = self.segment_order.remove(idx);
+                self.segment_order.insert(new_idx as usize, value);
+                moved = true;
+            }
+        }
+        moved
     }
 }
 
@@ -142,7 +192,11 @@ pub struct ContextRules {
     #[serde(default)]
     pub night_theme: Option<String>,
     #[serde(default)]
+    pub on_docker_activity: Option<String>,
+    #[serde(default)]
     pub project_themes: BTreeMap<String, String>,
+    #[serde(default)]
+    pub priority: Vec<String>,
 }
 
 fn default_true() -> bool {

@@ -5,28 +5,29 @@ use std::path::{Path, PathBuf};
 use crate::error::PrismResult;
 
 const ENABLED_FILE: &str = "widgets.json";
-const SETTINGS_FILE: &str = "widget-settings.json";
+const CONFIG_FILE: &str = "widgets-config.json";
 
-pub type WidgetSettings = BTreeMap<String, BTreeMap<String, String>>;
-
-pub fn load_enabled(config_dir: &Path) -> PrismResult<Vec<String>> {
-    let path = enabled_path(config_dir);
+pub fn load_enabled(dir: &Path) -> PrismResult<Vec<String>> {
+    let path = enabled_path(dir);
     if path.exists() {
         let raw = fs::read_to_string(path)?;
         Ok(serde_json::from_str(&raw).unwrap_or_default())
     } else {
-        Ok(Vec::new())
+        Ok(vec![])
     }
 }
 
-pub fn save_enabled(config_dir: &Path, widgets: &[String]) -> PrismResult<()> {
-    let path = enabled_path(config_dir);
+pub fn save_enabled(dir: &Path, widgets: &[String]) -> PrismResult<()> {
+    let path = enabled_path(dir);
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)?;
+    }
     fs::write(path, serde_json::to_string_pretty(widgets)?)?;
     Ok(())
 }
 
-pub fn load_settings(config_dir: &Path) -> PrismResult<WidgetSettings> {
-    let path = settings_path(config_dir);
+pub fn load_settings(dir: &Path) -> PrismResult<BTreeMap<String, BTreeMap<String, String>>> {
+    let path = config_path(dir);
     if path.exists() {
         let raw = fs::read_to_string(path)?;
         Ok(serde_json::from_str(&raw).unwrap_or_default())
@@ -35,27 +36,22 @@ pub fn load_settings(config_dir: &Path) -> PrismResult<WidgetSettings> {
     }
 }
 
-pub fn save_settings(config_dir: &Path, settings: &WidgetSettings) -> PrismResult<()> {
-    let path = settings_path(config_dir);
-    fs::write(path, serde_json::to_string_pretty(settings)?)?;
+pub fn save_settings(
+    dir: &Path,
+    config: &BTreeMap<String, BTreeMap<String, String>>,
+) -> PrismResult<()> {
+    let path = config_path(dir);
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    fs::write(path, serde_json::to_string_pretty(config)?)?;
     Ok(())
 }
 
-pub fn upsert_setting(config_dir: &Path, widget: &str, key: &str, value: &str) -> PrismResult<()> {
-    let mut settings = load_settings(config_dir)?;
-    let entry = settings.entry(widget.to_string()).or_default();
-    entry.insert(key.to_string(), value.to_string());
-    save_settings(config_dir, &settings)
+pub fn enabled_path(dir: &Path) -> PathBuf {
+    dir.join(ENABLED_FILE)
 }
 
-pub fn widget_settings_path(config_dir: &Path) -> PathBuf {
-    settings_path(config_dir)
-}
-
-fn enabled_path(config_dir: &Path) -> PathBuf {
-    config_dir.join(ENABLED_FILE)
-}
-
-fn settings_path(config_dir: &Path) -> PathBuf {
-    config_dir.join(SETTINGS_FILE)
+pub fn config_path(dir: &Path) -> PathBuf {
+    dir.join(CONFIG_FILE)
 }

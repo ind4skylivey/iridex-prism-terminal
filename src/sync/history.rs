@@ -3,12 +3,12 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use crate::ensure_config_dir;
 use crate::error::PrismResult;
-use crate::sync::client::SyncData;
+use crate::metadata_dir;
+use crate::sync::storage;
+use crate::sync::SyncData;
 
-const HISTORY_DIR: &str = "history";
-const INDEX_FILE: &str = "index.json";
+const HISTORY_FILE: &str = "sync-history.json";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HistoryEntry {
@@ -17,59 +17,63 @@ pub struct HistoryEntry {
     pub snapshot_path: String,
 }
 
-pub fn record_snapshot(action: &str, snapshot: &SyncData) -> PrismResult<()> {
-    let dir = history_dir()?;
-    fs::create_dir_all(&dir)?;
-    let filename = format!("{}-{action}.json", sanitize(&snapshot.timestamp));
-    let path = dir.join(filename);
-    fs::write(&path, serde_json::to_string_pretty(snapshot)?)?;
-
-    let mut entries = read_entries(&dir)?;
+pub fn record(action: &str, snapshot_path: &Path) -> PrismResult<()> {
+    let mut entries = load_all()?;
     entries.push(HistoryEntry {
         action: action.into(),
-        timestamp: snapshot.timestamp.clone(),
-        snapshot_path: path.to_string_lossy().to_string(),
+        timestamp: chrono::Local::now().to_rfc3339(),
+        snapshot_path: snapshot_path.display().to_string(),
     });
-    write_entries(&dir, &entries)?;
-    Ok(())
+    save_all(&entries)
 }
 
 pub fn list() -> PrismResult<Vec<HistoryEntry>> {
-    read_entries(&history_dir()?)
+    let mut entries = load_all()?;
+    entries.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+    Ok(entries)
 }
 
 pub fn latest() -> PrismResult<Option<HistoryEntry>> {
-    Ok(list()?.into_iter().last())
+    let mut entries = load_all()?;
+    entries.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+    Ok(entries.pop())
 }
 
-pub fn load_snapshot(path: &str) -> PrismResult<SyncData> {
-    let raw = fs::read_to_string(path)?;
-    Ok(serde_json::from_str(&raw)?)
-}
-
-fn history_dir() -> PrismResult<PathBuf> {
-    Ok(ensure_config_dir()?.join(HISTORY_DIR))
-}
-
-fn read_entries(dir: &Path) -> PrismResult<Vec<HistoryEntry>> {
-    let path = dir.join(INDEX_FILE);
+fn load_all() -> PrismResult<Vec<HistoryEntry>> {
+    let path = history_path()?;
     if path.exists() {
         let raw = fs::read_to_string(path)?;
         Ok(serde_json::from_str(&raw).unwrap_or_default())
     } else {
-        Ok(Vec::new())
+        Ok(vec![])
     }
 }
 
-fn write_entries(dir: &Path, entries: &[HistoryEntry]) -> PrismResult<()> {
-    let path = dir.join(INDEX_FILE);
+fn save_all(entries: &[HistoryEntry]) -> PrismResult<()> {
+    let path = history_path()?;
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)?;
+    }
     fs::write(path, serde_json::to_string_pretty(entries)?)?;
     Ok(())
 }
 
-fn sanitize(value: &str) -> String {
-    value
-        .chars()
-        .map(|ch| if ch.is_ascii_alphanumeric() { ch } else { '-' })
-        .collect()
+fn history_path() -> PrismResult<PathBuf> {
+    Ok(metadata_dir()?.join(HISTORY_FILE))
+}
+
+pub fn record_snapshot(action: &str, payload: &SyncData) -> PrismResult<()> {
+    let serialized = serde_json::to_string_pretty(payload)?;
+    let key = format!(
+        "sync-{}-{}",
+        chrono::Local::now().format("%Y%m%d%H%M%S"),
+        action
+    );
+    let path = storage::write_metadata(&key, &serialized)?;
+    record(action, &path)
+}
+
+pub fn load_snapshot(path: &str) -> PrismResult<SyncData> {
+    let data = fs::read_to_string(path)?;
+    Ok(serde_json::from_str(&data)?)
 }

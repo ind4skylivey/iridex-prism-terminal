@@ -1,4 +1,5 @@
 pub mod detector;
+pub mod docker;
 pub mod git;
 pub mod project;
 pub mod rules;
