@@ -1,106 +1,121 @@
-# IRIDEX (PRISM) – Adaptive Terminal Aesthetic Manager
+<div align="center">
 
-IRIDEX, code-named **PRISM**, is a Rust terminal aesthetic platform that fuses live previews, context-aware rule sets, animated widgets, and secure sync tooling into a single CLI. The project targets fast feedback, zero guesswork theming, and production-ready ergonomics across Zsh, Bash, and Fish.
+# 🌈 IRIDEX • PRISM
 
-## Why PRISM?
-- **Context-native themes:** Git/project/time/system/docker detectors feed a rule engine so prompts react to the work you are doing.
-- **Ratatui previews & editor groundwork:** See a theme before touching your shell, with a future-facing editor stubbed out for inline edits.
-- **Widget runtime:** Async trait-based widgets (git, system, clock, docker) animate inside prompts and can be extended via examples.
-- **Live prompt streaming + caching:** Shell scripts watch the prompt stream file while the daemon caches widget output and throttles updates to keep terminals responsive.
-- **Cloud & dotfiles sync:** Reqwest-based client, token storage, and dotfile tracking (size/hash/perms metadata) set the stage for encrypted push/pull workflows and safer restores.
-- **Daemon + IPC:** Background watcher/IPC server keep shells aligned without manual `apply` loops.
-- **AI-ready feature flag:** `ai_small_model` + `PRISM_AI=1` opt-in enables small-model experiments without impacting the default binary.
-- **Adaptive cadence:** The watcher dynamically stretches intervals when load spikes or containers idle, trimming laptop battery usage.
-- **Adaptive cadence:** The watcher dynamically lengthens intervals when system load spikes or containers are quiet to conserve power.
+### *Adaptive Terminal Aesthetic Manager*
 
-## Quickstart
-Prerequisites: Rust 1.74+ (stable), a modern terminal, and optional Ollama endpoint if experimenting with the AI feature.
+<img src="https://raw.githubusercontent.com/catppuccin/catppuccin/main/assets/palette/macchiato.png" width="600px" />
 
-```bash
-# Install dependencies
-cargo fetch
+[![Made with Rust](https://img.shields.io/badge/Made%20with-Rust-orange?style=for-the-badge&logo=rust&logoColor=white)](https://www.rust-lang.org)
+[![Powered by Ratatui](https://img.shields.io/badge/Powered%20by-Ratatui-blueviolet?style=for-the-badge&logo=rust)](https://ratatui.rs)
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20%7C%20Apache--2.0-blue?style=for-the-badge)](./LICENSE-MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](http://makeapullrequest.com)
 
-# Build & try the CLI
-cargo build --release
-./target/release/prism list
-./target/release/prism preview
-./target/release/prism apply cyberpunk --shell zsh
-```
+[![Rust Version](https://img.shields.io/badge/rust-1.74%2B-orange?style=flat-square&logo=rust)](https://www.rust-lang.org)
+[![Build Status](https://img.shields.io/badge/build-passing-success?style=flat-square)](https://github.com/ind4skylivey/prims-terminal)
+[![Code Style](https://img.shields.io/badge/code%20style-rustfmt-blue?style=flat-square)](https://github.com/rust-lang/rustfmt)
+[![Stars](https://img.shields.io/github/stars/ind4skylivey/prims-terminal?style=flat-square&color=yellow)](https://github.com/ind4skylivey/prims-terminal/stargazers)
 
-To run in debug mode with verbose logging:
-```bash
-cargo run -- --verbose preview
-```
+*A Rust-powered terminal aesthetic platform fusing live previews, context-aware rules, animated widgets, and secure cloud sync into a single CLI*
 
-## CLI Overview
-| Command | Purpose |
-| --- | --- |
-| `prism list` | Enumerate built-in + user themes pulled from `themes/` and `~/.config/prism/themes`. |
-| `prism preview [name]` | Open the Ratatui preview carousel to inspect themes before applying. |
-| `prism apply <theme> [--shell {zsh,bash,fish}]` | Generate shell-specific prompt scripts and source hooks safely (backups included). |
-| `prism edit [theme]` | Launch the theme editor TUI to adjust metadata, toggles, segments, and colors; saves to `~/.config/prism/themes/`. |
-| `prism auto [--set THEME|--clear]` | Capture a context snapshot, honor rule priorities, or pin/clear a manual override (`rules.toml`). |
-| `prism widget <add|remove|list|configure>` | Manage persisted widget selections stored under `~/.config/prism/widgets.json`. |
-| `prism sync <push|pull|status|configure|history|rollback>` | Exercise the sync client, token store, dotfile scaffolding, and snapshot history/rollback helpers. |
-| `prism sync dotfiles <list|restore>` | Inspect tracked dotfiles or copy a specific one back to your home directory. |
-| `prism sync jwt issue [--subject ... --ttl ...]` | Mint JWTs locally using the stored secret so sync commands always have a fresh bearer token. |
-| `prism sync serve [--listen ...]` | Launch the built-in JWT-protected sync backend for local testing. |
-| `prism daemon <start|stop|status|enable>` | Run the context watcher + IPC server loop. |
-| `prism config <get|set|edit|reset>` | Inspect or mutate CLI configuration JSON in the config directory. |
-| `prism revert [--shell ...]` | Remove sourced prompt scripts for the selected shell. |
+[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Themes](#-built-in-themes) • [Architecture](#%EF%B8%8F-architecture) • [Contributing](#-contributing)
 
-## Architecture at a Glance
-- `src/core`: Theme parsing/validation, prompt generation, and shell apply logic (with automatic backup + sourcing).
-- `src/context`: Git/project/time/system/docker detectors plus the rule engine driving auto suggestions and daemon behavior.
-- `src/prompt_stream`: Prompt stream path utilities + formatter with caching-friendly helpers for the live shell snippets.
-- `src/widgets`: Async widget trait, manager, and stock widgets (git/system/clock/docker) ready for composition.
-- `src/tui`: Ratatui preview and editor scaffold, including reusable terminal frame + color picker components.
-- `src/sync`: HTTP client, token store, dotfiles helper, and metadata persistence.
-- `src/daemon`: Context watcher loop, widget updater heartbeat, and lightweight TCP IPC server.
-- `docs/`: Architecture notes, plan checkpoints, widget/theme guides, installation recipes, and sync reference material.
+</div>
 
-See `docs/ARCHITECTURE.md` for diagrams and `docs/PLAN.md` for the sprint checklist that tracks what is production-ready vs. planned.
+---
 
-## Context & Widgets Pipeline
-1. **Detection:** `ContextDetector` inspects git status, project manifests, local time-of-day, system load, and docker hints.
-2. **Rule evaluation:** `RuleEngine` maps those signals to a named theme (e.g., night work → `tokyo-night`, heavy CPU → `minimal`).
-3. **Widgets:** `WidgetManager` spins through registered async widgets, rendering colored glyphs that are stitched into prompt segments.
-4. **Prompt output:** `core::prompt` emits shell-specific scripts that read the live prompt stream, so widgets/context refresh without reapplying.
+## 🎬 Demo
 
-The daemon reuses this pipeline in a tokio loop to reapply themes whenever context drift is detected.
+> **Note:** Record your terminal sessions with [asciinema](https://asciinema.org) and convert to GIF using [agg](https://github.com/asciinema/agg)
 
-## Cloud Sync & Tokens
-- Configure credentials via `PRISM_SYNC_TOKEN` or `prism sync configure` (writes `~/.config/prism/auth.token`).
-- Provide JWT material through `PRISM_SYNC_JWT_SECRET` so the client can validate and attach bearer tokens automatically.
-- Use `prism sync jwt issue --subject <you> --ttl 7200` to sign and store a short-lived token without leaving the CLI.
-- `SyncClient` targets the local backend at `http://127.0.0.1:7878` by default (override with `PRISM_SYNC_ENDPOINT`) and already serializes theme lists, widget config, and dotfile manifests (plus dotfile payloads as base64 blobs).
-- Run `prism sync serve --listen 127.0.0.1:7878` to bring up the local backend (requires the same JWT secret); the CLI defaults to `http://127.0.0.1:7878` unless `PRISM_SYNC_ENDPOINT` overrides it.
-- Dotfiles dropped into `~/.config/prism/dotfiles/` can be tracked via `sync::dotfiles`, streamed in sync snapshots, and selectively restored with `prism sync dotfiles`. Snapshots now include file size, last-modified timestamps, SHA-256 digests, and permission hints for integrity checks.
-- `prism sync history` and `prism sync rollback` read/write compressed metadata snapshots so you can inspect prior pushes or revert to the last pull.
-- Set `PRISM_SYNC_FORCE=1` to override conflict detection or `PRISM_SYNC_DOTFILES=<name1,name2|all|none>` to control which dotfiles apply during pull.
+<div align="center">
 
-## Development Workflow
-```bash
-# Format + lint + test everything
-cargo fmt
-cargo clippy --all-targets --all-features -- -D warnings
-cargo test --all-targets --all-features
-```
+<!-- ADD YOUR GIF DEMOS HERE -->
+### Theme Preview in Action
+![PRISM Preview Demo](./docs/demo/preview.gif)
 
-Recommended tooling:
-- Set `RUST_LOG=debug` when iterating on daemon/watchers.
-- Use `cargo run --features ai_small_model -- auto` to verify feature-gated code stays tidy.
-- Regenerate docs or diagrams in `docs/` whenever you land major architectural changes.
-- Use `prism daemon enable` to write + auto-enable the user service (the command now runs `systemctl --user daemon-reload` + `enable --now` and prints instructions if it cannot).
+### Live Widget Updates
+![Widget Demo](./docs/demo/widgets.gif)
 
-## Roadmap Highlights
-- Add prompt segment reordering + gallery search to the TUI experience.
-- Implement JWT auth + conflict resolution in the sync client.
-- Surface selective/differential dotfile sync plus backup policies.
-- Bring Systemd unit files + installers for macOS/Linux shells.
-- Expand daemon IPC so shells can request context snapshots on demand.
+### Context-Aware Theme Switching
+![Context Demo](./docs/demo/context.gif)
 
-Track progress in `docs/PLAN.md` and the translated work plan under `../🚀 PRISM - PROYECTO TERMINAL AESTHETIC REVOLUTION.md`.
+</div>
 
-## License
-Dual-licensed under MIT or Apache-2.0. See `LICENSE-MIT` and `LICENSE-APACHE` for details.
+---
+
+## ✨ Features
+
+<table>
+<tr>
+<td width="50%">
+
+### 🎨 **Smart Theming**
+- Context-native themes with Git/project/time/system/Docker detection
+- Rule engine that adapts prompts to your workflow
+- Zero-config automatic theme switching
+- Custom theme creation with TOML
+
+</td>
+<td width="50%">
+
+### ⚡ **Live Preview & Editing**
+- Ratatui-powered TUI with instant preview
+- Interactive theme editor with color picker
+- See changes before they hit your shell
+- Export/import theme configurations
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🔌 **Widget Runtime**
+- Async trait-based widget system
+- Built-in: Git status, system info, clock, Docker
+- Animated and cached for performance
+- Extensible with custom widgets
+
+</td>
+<td width="50%">
+
+### ☁️ **Cloud Sync & Dotfiles**
+- Secure token-based authentication
+- JWT integration for encrypted workflows
+- Dotfile tracking with SHA-256 integrity
+- Compressed snapshots with rollback support
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🔋 **Power Efficient**
+- Adaptive cadence based on system load
+- Smart caching to reduce CPU usage
+- Battery-friendly for laptops
+- Daemon with IPC for minimal overhead
+
+</td>
+<td width="50%">
+
+### 🤖 **AI-Ready**
+- Optional AI features via feature flags
+- Small model experiments with `PRISM_AI=1`
+- Keeps default binary lean
+- Future-proof architecture
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🚀 Installation
+
+### Prerequisites
+
+![Rust](https://img.shields.io/badge/Rust-1.74+-orange?style=flat&logo=rust&logoColor=white)
+![Terminal](https://img.shields.io/badge/Terminal-Modern-green?style=flat&logo=gnometerminal)
+![Optional](https://img.shields.io/badge/Ollama-Optional-blue?style=flat)
+
