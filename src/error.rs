@@ -10,6 +10,8 @@ pub enum PrismError {
     Io(#[from] std::io::Error),
     #[error("Theme parsing error: {0}")]
     ThemeParse(#[from] toml::de::Error),
+    #[error("TOML serialization error: {0}")]
+    TomlSerialize(#[from] toml::ser::Error),
     #[error("JSON error: {0}")]
     Json(#[from] serde_json::Error),
     #[error("Git error: {0}")]

@@ -19,12 +19,14 @@ pub struct ContextSnapshot {
 
 pub struct ContextDetector {
     rules: RuleEngine,
+    manual_override: Option<RuleEngine>,
 }
 
 impl ContextDetector {
-    pub fn new(rules: Option<ContextRules>) -> Self {
+    pub fn new(rules: Option<ContextRules>, manual_override: Option<ContextRules>) -> Self {
         Self {
             rules: RuleEngine::new(rules.unwrap_or_default()),
+            manual_override: manual_override.map(RuleEngine::new),
         }
     }
 
@@ -39,7 +41,11 @@ impl ContextDetector {
             project: project.clone(),
             time: time_ctx.clone(),
             system: system_ctx.clone(),
-            suggested_theme: self.rules.evaluate(&git, &project, &time_ctx, &system_ctx),
+            suggested_theme: self
+                .manual_override
+                .as_ref()
+                .and_then(|engine| engine.evaluate(&git, &project, &time_ctx, &system_ctx))
+                .or_else(|| self.rules.evaluate(&git, &project, &time_ctx, &system_ctx)),
         };
 
         Ok(snapshot)

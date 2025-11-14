@@ -1,54 +1,80 @@
-use std::fs;
-
 use super::{CliContext, WidgetArgs, WidgetCommands};
-use crate::error::PrismResult;
-
-const WIDGET_FILE: &str = "widgets.json";
+use crate::error::{PrismError, PrismResult};
+use crate::widgets::storage::{self, WidgetSettings};
 
 pub fn handle_widget(args: WidgetArgs, ctx: &CliContext) -> PrismResult<()> {
-    let mut widgets = read_widgets(ctx)?;
     match args.command {
-        WidgetCommands::Add { name } => {
-            if !widgets.contains(&name) {
-                widgets.push(name.clone());
-                println!("Widget '{name}' enabled.");
-            }
-            write_widgets(ctx, &widgets)?;
-        }
-        WidgetCommands::Remove { name } => {
-            widgets.retain(|w| w != &name);
-            write_widgets(ctx, &widgets)?;
-            println!("Widget '{name}' removed.");
-        }
-        WidgetCommands::List => {
-            if widgets.is_empty() {
-                println!("No widgets enabled yet.");
-            } else {
-                println!("Enabled widgets:");
-                for widget in &widgets {
-                    println!("- {widget}");
-                }
-            }
-        }
-        WidgetCommands::Configure { name } => {
-            println!("Configuration UI for '{name}' is not implemented yet.");
-        }
+        WidgetCommands::Add { name } => add_widget(ctx, &name),
+        WidgetCommands::Remove { name } => remove_widget(ctx, &name),
+        WidgetCommands::List => list_widgets(ctx),
+        WidgetCommands::Configure { name, key, value } => configure_widget(ctx, &name, key, value),
     }
-    Ok(())
 }
 
-fn read_widgets(ctx: &CliContext) -> PrismResult<Vec<String>> {
-    let path = ctx.config_dir.join(WIDGET_FILE);
-    if path.exists() {
-        let raw = fs::read_to_string(path)?;
-        Ok(serde_json::from_str(&raw).unwrap_or_default())
+fn add_widget(ctx: &CliContext, name: &str) -> PrismResult<()> {
+    let mut widgets = storage::load_enabled(&ctx.config_dir)?;
+    if !widgets.iter().any(|w| w == name) {
+        widgets.push(name.to_string());
+        widgets.sort();
+        println!("Widget '{name}' enabled.");
+    }
+    storage::save_enabled(&ctx.config_dir, &widgets)
+}
+
+fn remove_widget(ctx: &CliContext, name: &str) -> PrismResult<()> {
+    let mut widgets = storage::load_enabled(&ctx.config_dir)?;
+    let original_len = widgets.len();
+    widgets.retain(|w| w != name);
+    if widgets.len() < original_len {
+        println!("Widget '{name}' removed.");
+    }
+    storage::save_enabled(&ctx.config_dir, &widgets)
+}
+
+fn list_widgets(ctx: &CliContext) -> PrismResult<()> {
+    let widgets = storage::load_enabled(&ctx.config_dir)?;
+    if widgets.is_empty() {
+        println!("No widgets enabled yet.");
     } else {
-        Ok(vec![])
+        println!("Enabled widgets:");
+        for widget in widgets {
+            println!("- {widget}");
+        }
+    }
+    Ok(())
+}
+
+fn configure_widget(
+    ctx: &CliContext,
+    name: &str,
+    key: Option<String>,
+    value: Option<String>,
+) -> PrismResult<()> {
+    match (key, value) {
+        (Some(k), Some(v)) => {
+            storage::upsert_setting(&ctx.config_dir, name, &k, &v)?;
+            println!("Set {name}.{k} = {v}");
+            Ok(())
+        }
+        (Some(_), None) | (None, Some(_)) => Err(PrismError::new(
+            "Provide both --key and --value to configure a widget setting.",
+        )),
+        (None, None) => {
+            let settings = storage::load_settings(&ctx.config_dir)?;
+            show_widget_settings(name, &settings);
+            Ok(())
+        }
     }
 }
 
-fn write_widgets(ctx: &CliContext, widgets: &[String]) -> PrismResult<()> {
-    let path = ctx.config_dir.join(WIDGET_FILE);
-    fs::write(path, serde_json::to_string_pretty(widgets)?)?;
-    Ok(())
+fn show_widget_settings(name: &str, settings: &WidgetSettings) {
+    match settings.get(name) {
+        Some(entries) if !entries.is_empty() => {
+            println!("Settings for '{name}':");
+            for (key, value) in entries {
+                println!("- {key} = {value}");
+            }
+        }
+        _ => println!("No settings stored for '{name}'."),
+    }
 }
