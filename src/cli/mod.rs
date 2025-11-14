@@ -50,7 +50,7 @@ pub enum Commands {
     Preview(PreviewArgs),
     List,
     Edit(EditArgs),
-    Auto,
+    Auto(AutoArgs),
     Widget(WidgetArgs),
     Sync(SyncArgs),
     Daemon(DaemonArgs),
@@ -75,6 +75,14 @@ pub struct EditArgs {
     pub theme: Option<String>,
 }
 
+#[derive(Args, Debug, Default)]
+pub struct AutoArgs {
+    #[arg(long, value_name = "THEME")]
+    pub set: Option<String>,
+    #[arg(long)]
+    pub clear: bool,
+}
+
 #[derive(Args, Debug)]
 pub struct WidgetArgs {
     #[command(subcommand)]
@@ -83,10 +91,20 @@ pub struct WidgetArgs {
 
 #[derive(Subcommand, Debug)]
 pub enum WidgetCommands {
-    Add { name: String },
-    Remove { name: String },
+    Add {
+        name: String,
+    },
+    Remove {
+        name: String,
+    },
     List,
-    Configure { name: String },
+    Configure {
+        name: String,
+        #[arg(long)]
+        key: Option<String>,
+        #[arg(long)]
+        value: Option<String>,
+    },
 }
 
 #[derive(Args, Debug)]
@@ -101,6 +119,10 @@ pub enum SyncCommands {
     Pull,
     Status,
     Configure,
+    History,
+    Rollback,
+    Dotfiles(DotfileArgs),
+    Jwt(JwtArgs),
 }
 
 #[derive(Args, Debug)]
@@ -129,6 +151,42 @@ pub enum ConfigCommands {
     Set { key: String, value: String },
     Edit,
     Reset,
+}
+
+#[derive(Args, Debug)]
+pub struct DotfileArgs {
+    #[command(subcommand)]
+    pub command: DotfileCommands,
+}
+
+#[derive(Subcommand, Debug)]
+pub enum DotfileCommands {
+    List,
+    Restore {
+        name: String,
+        #[arg(long)]
+        destination: Option<PathBuf>,
+    },
+}
+
+#[derive(Args, Debug)]
+pub struct JwtArgs {
+    #[command(subcommand)]
+    pub command: JwtCommands,
+}
+
+#[derive(Subcommand, Debug)]
+pub enum JwtCommands {
+    Issue {
+        #[arg(long, default_value = "local-dev")]
+        subject: String,
+        #[arg(long, default_value_t = 3600)]
+        ttl: u64,
+        #[arg(long)]
+        secret: Option<String>,
+        #[arg(long)]
+        no_store: bool,
+    },
 }
 
 #[derive(Args, Debug)]
@@ -185,7 +243,7 @@ pub fn run(cli: PrismCli) -> PrismResult<()> {
         Commands::Preview(args) => handle_preview(args, &ctx),
         Commands::List => handle_list(&ctx),
         Commands::Edit(args) => handle_edit(args, &ctx),
-        Commands::Auto => handle_auto(&ctx),
+        Commands::Auto(args) => handle_auto(args, &ctx),
         Commands::Widget(args) => handle_widget(args, &ctx),
         Commands::Sync(args) => handle_sync(args, &ctx),
         Commands::Daemon(args) => handle_daemon(args, &ctx),

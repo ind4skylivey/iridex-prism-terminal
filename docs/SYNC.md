@@ -13,6 +13,8 @@ IRIDEX sync keeps themes, configs, and selected dotfiles in sync across machines
 - `prism sync pull` — downloads data and prints summary.
 - `prism sync status` — compares local timestamp to remote.
 - `prism sync configure` — writes placeholder token for local dev.
+- `prism sync dotfiles <list|restore>` — inspect tracked files or restore one into place.
+- `prism sync jwt issue [--subject ... --ttl ...]` — sign a short-lived JWT with the stored secret and print/store it.
 
 ## API Contract (draft)
 ```
@@ -24,7 +26,13 @@ GET  /status -> { local_timestamp, remote_timestamp }
 ## Dotfiles Manager
 1. Place files under `~/.config/prism/dotfiles` via future automation.
 2. `sync::dotfiles::track` copies files into managed space with backup semantics.
-3. Sync includes hashed metadata (TODO: S1b Fase 5.3).
+3. Sync captures file size, last-modified timestamps, SHA-256 digests, and permission hints for every tracked file so pulls can verify integrity and preserve modes.
+4. `PRISM_SYNC_AUTO_RESTORE=1` copies the synced version back into its original path (falling back to `$HOME/<name>`).
+
+## JWT Issuance
+- Secrets live in `~/.config/prism/auth.jwt` or `PRISM_SYNC_JWT_SECRET`.
+- `prism sync jwt issue --subject workstation --ttl 3600` signs tokens locally via HS256 and writes them to `~/.config/prism/auth.token` unless `--no-store` is set.
+- Tokens are validated before push/pull; expired tokens must be reissued.
 
 ## Security
 - JWT tokens stored locally; never commit them.
