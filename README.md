@@ -44,6 +44,7 @@ cargo run -- --verbose preview
 | `prism sync <push|pull|status|configure|history|rollback>` | Exercise the sync client, token store, dotfile scaffolding, and snapshot history/rollback helpers. |
 | `prism sync dotfiles <list|restore>` | Inspect tracked dotfiles or copy a specific one back to your home directory. |
 | `prism sync jwt issue [--subject ... --ttl ...]` | Mint JWTs locally using the stored secret so sync commands always have a fresh bearer token. |
+| `prism sync serve [--listen ...]` | Launch the built-in JWT-protected sync backend for local testing. |
 | `prism daemon <start|stop|status|enable>` | Run the context watcher + IPC server loop. |
 | `prism config <get|set|edit|reset>` | Inspect or mutate CLI configuration JSON in the config directory. |
 | `prism revert [--shell ...]` | Remove sourced prompt scripts for the selected shell. |
@@ -72,7 +73,8 @@ The daemon reuses this pipeline in a tokio loop to reapply themes whenever conte
 - Configure credentials via `PRISM_SYNC_TOKEN` or `prism sync configure` (writes `~/.config/prism/auth.token`).
 - Provide JWT material through `PRISM_SYNC_JWT_SECRET` so the client can validate and attach bearer tokens automatically.
 - Use `prism sync jwt issue --subject <you> --ttl 7200` to sign and store a short-lived token without leaving the CLI.
-- `SyncClient` currently talks to a placeholder endpoint but already serializes theme lists, widget config, and dotfile manifests (plus dotfile payloads as base64 blobs).
+- `SyncClient` targets the local backend at `http://127.0.0.1:7878` by default (override with `PRISM_SYNC_ENDPOINT`) and already serializes theme lists, widget config, and dotfile manifests (plus dotfile payloads as base64 blobs).
+- Run `prism sync serve --listen 127.0.0.1:7878` to bring up the local backend (requires the same JWT secret); the CLI defaults to `http://127.0.0.1:7878` unless `PRISM_SYNC_ENDPOINT` overrides it.
 - Dotfiles dropped into `~/.config/prism/dotfiles/` can be tracked via `sync::dotfiles`, streamed in sync snapshots, and selectively restored with `prism sync dotfiles`. Snapshots now include file size, last-modified timestamps, SHA-256 digests, and permission hints for integrity checks.
 - `prism sync history` and `prism sync rollback` read/write compressed metadata snapshots so you can inspect prior pushes or revert to the last pull.
 - Set `PRISM_SYNC_FORCE=1` to override conflict detection or `PRISM_SYNC_DOTFILES=<name1,name2|all|none>` to control which dotfiles apply during pull.

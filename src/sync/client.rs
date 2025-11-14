@@ -4,6 +4,9 @@ use serde::{Deserialize, Serialize};
 use crate::error::PrismResult;
 use crate::sync::jwt;
 
+const DEFAULT_ENDPOINT: &str = "http://127.0.0.1:7878";
+const ENDPOINT_ENV: &str = "PRISM_SYNC_ENDPOINT";
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SyncData {
     pub themes: Vec<String>,
@@ -50,7 +53,9 @@ impl SyncClient {
             jwt::validate(token, secret.as_deref())?;
         }
         Ok(Self {
-            endpoint: endpoint.unwrap_or_else(|| "https://sync.iridex.invalid".into()),
+            endpoint: endpoint
+                .or_else(|| std::env::var(ENDPOINT_ENV).ok())
+                .unwrap_or_else(|| DEFAULT_ENDPOINT.into()),
             http: reqwest::Client::new(),
             token,
         })

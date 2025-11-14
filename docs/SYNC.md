@@ -15,6 +15,7 @@ IRIDEX sync keeps themes, configs, and selected dotfiles in sync across machines
 - `prism sync configure` — writes placeholder token for local dev.
 - `prism sync dotfiles <list|restore>` — inspect tracked files or restore one into place.
 - `prism sync jwt issue [--subject ... --ttl ...]` — sign a short-lived JWT with the stored secret and print/store it.
+- `prism sync serve [--listen ...]` — launch the bundled backend for local development and tests.
 
 ## API Contract (draft)
 ```
@@ -28,6 +29,11 @@ GET  /status -> { local_timestamp, remote_timestamp }
 2. `sync::dotfiles::track` copies files into managed space with backup semantics.
 3. Sync captures file size, last-modified timestamps, SHA-256 digests, and permission hints for every tracked file so pulls can verify integrity and preserve modes.
 4. `PRISM_SYNC_AUTO_RESTORE=1` copies the synced version back into its original path (falling back to `$HOME/<name>`).
+
+## Local Backend
+- Run `prism sync serve --listen 127.0.0.1:7878` to start the Axum-based backend that honors the same JWT secret as the CLI.
+- The CLI targets `http://127.0.0.1:7878` by default; override with `PRISM_SYNC_ENDPOINT=<url>`.
+- Backend state is persisted under `~/.config/prism/metadata/sync-backend.json`, so pushes/pulls survive restarts.
 
 ## JWT Issuance
 - Secrets live in `~/.config/prism/auth.jwt` or `PRISM_SYNC_JWT_SECRET`.

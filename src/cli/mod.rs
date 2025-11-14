@@ -9,6 +9,7 @@ pub mod revert;
 pub mod sync;
 pub mod widget;
 
+use std::net::SocketAddr;
 use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand, ValueEnum};
@@ -123,6 +124,7 @@ pub enum SyncCommands {
     Rollback,
     Dotfiles(DotfileArgs),
     Jwt(JwtArgs),
+    Serve(SyncServeArgs),
 }
 
 #[derive(Args, Debug)]
@@ -167,6 +169,16 @@ pub enum DotfileCommands {
         #[arg(long)]
         destination: Option<PathBuf>,
     },
+}
+
+#[derive(Args, Debug)]
+pub struct SyncServeArgs {
+    #[arg(
+        long,
+        value_parser = clap::value_parser!(SocketAddr),
+        default_value = "127.0.0.1:7878"
+    )]
+    pub listen: SocketAddr,
 }
 
 #[derive(Args, Debug)]

@@ -7,12 +7,13 @@ use base64::Engine;
 
 use super::{
     CliContext, DotfileArgs, DotfileCommands, JwtArgs, JwtCommands, SyncArgs, SyncCommands,
+    SyncServeArgs,
 };
 use crate::core::loader;
 use crate::error::{PrismError, PrismResult};
 use crate::sync::auth;
 use crate::sync::client::{DotfileRecord, SyncClient, SyncData};
-use crate::sync::{dotfiles, history, jwt, state};
+use crate::sync::{dotfiles, history, jwt, server, state};
 use crate::widgets::storage as widget_storage;
 use crate::{ensure_config_dir, user_themes_dir};
 
@@ -31,6 +32,7 @@ pub fn handle_sync(args: SyncArgs, _ctx: &CliContext) -> PrismResult<()> {
         SyncCommands::Rollback => rollback(),
         SyncCommands::Dotfiles(args) => handle_dotfiles(args),
         SyncCommands::Jwt(args) => handle_jwt(args),
+        SyncCommands::Serve(args) => runtime.block_on(run_server(args)),
     }
 }
 
@@ -177,6 +179,19 @@ fn handle_jwt(args: JwtArgs) -> PrismResult<()> {
             no_store,
         } => issue_jwt(&subject, ttl, secret, no_store),
     }
+}
+
+async fn run_server(args: SyncServeArgs) -> PrismResult<()> {
+    let secret = auth::resolve_jwt_secret()?.ok_or_else(|| {
+        PrismError::new(
+            "Set PRISM_SYNC_JWT_SECRET or `prism sync configure` before running the server.",
+        )
+    })?;
+    println!(
+        "Starting local sync backend on {} (Ctrl+C to stop)...",
+        args.listen
+    );
+    server::serve_until_ctrl_c(args.listen, secret).await
 }
 
 fn restore_dotfile(name: &str, destination: Option<PathBuf>) -> PrismResult<()> {
