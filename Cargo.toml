@@ -40,5 +40,10 @@ hex = "0.4"
 axum = "0.7"
 
 [dev-dependencies]
+criterion = "0.5"
 tempfile = "3.8"
 mockall = "0.12"
+
+[[bench]]
+name = "prompt"
+harness = false

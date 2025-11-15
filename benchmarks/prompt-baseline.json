@@ -1,0 +1,43 @@
+{
+  "captured_at_utc": "2025-11-15T01:03:22.804912+00:00",
+  "command": "cargo bench --bench prompt -- --sample-size=75 --measurement-time=5",
+  "criterion": {
+    "profile": "bench",
+    "directory": "target/criterion"
+  },
+  "metrics": {
+    "prompt_generate_zsh": {
+      "mean_ns": 339.4193599092794,
+      "median_ns": 336.45099145381215,
+      "std_dev_ns": 7.347859280268234,
+      "mean_ci_95": {
+        "lower_ns": 337.84469726317747,
+        "upper_ns": 341.1388670241835
+      },
+      "sample_size": 75,
+      "measurement_time_s": 5
+    },
+    "prompt_generate_bash": {
+      "mean_ns": 365.1521001235997,
+      "median_ns": 363.3220751258106,
+      "std_dev_ns": 8.967032529217194,
+      "mean_ci_95": {
+        "lower_ns": 363.4596629441248,
+        "upper_ns": 367.41907104577064
+      },
+      "sample_size": 75,
+      "measurement_time_s": 5
+    },
+    "prompt_generate_fish": {
+      "mean_ns": 356.62852772205406,
+      "median_ns": 356.2643208467144,
+      "std_dev_ns": 2.288558826788844,
+      "mean_ci_95": {
+        "lower_ns": 356.117820634652,
+        "upper_ns": 357.14308241491005
+      },
+      "sample_size": 75,
+      "measurement_time_s": 5
+    }
+  }
+}
