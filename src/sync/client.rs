@@ -44,6 +44,8 @@ pub struct SyncStatus {
     pub remote_timestamp: Option<String>,
     #[serde(default)]
     pub remote_version: Option<u64>,
+    #[serde(default)]
+    pub remote_error: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -168,21 +170,46 @@ impl SyncClient {
 
     pub async fn status(&self) -> PrismResult<SyncStatus> {
         let local = Local::now().to_rfc3339();
-        let resp = self
-            .with_auth(self.http.get(format!("{}/status", self.endpoint)))
-            .send()
-            .await;
-        if let Ok(response) = resp {
-            if let Ok(mut status) = response.json::<SyncStatus>().await {
-                status.local_timestamp = local.clone();
-                return Ok(status);
+        let request = self.with_auth(self.http.get(format!("{}/status", self.endpoint)));
+        match request.send().await {
+            Ok(response) => {
+                if response.status().is_success() {
+                    match response.json::<SyncStatus>().await {
+                        Ok(mut status) => {
+                            status.local_timestamp = local;
+                            Ok(status)
+                        }
+                        Err(err) => Ok(SyncStatus {
+                            local_timestamp: local,
+                            remote_timestamp: None,
+                            remote_version: None,
+                            remote_error: Some(format!("Failed to parse status response: {err}")),
+                        }),
+                    }
+                } else {
+                    Ok(SyncStatus {
+                        local_timestamp: local,
+                        remote_timestamp: None,
+                        remote_version: None,
+                        remote_error: Some(format!("HTTP {}", response.status())),
+                    })
+                }
             }
+            Err(err) => Ok(SyncStatus {
+                local_timestamp: local,
+                remote_timestamp: None,
+                remote_version: None,
+                remote_error: Some(err.to_string()),
+            }),
         }
-        Ok(SyncStatus {
-            local_timestamp: local,
-            remote_timestamp: None,
-            remote_version: None,
-        })
+    }
+
+    fn with_auth(&self, builder: reqwest::RequestBuilder) -> reqwest::RequestBuilder {
+        if let Some(token) = &self.token {
+            builder.bearer_auth(token)
+        } else {
+            builder
+        }
     }
 
     fn empty_payload() -> SyncData {
@@ -192,14 +219,6 @@ impl SyncClient {
             dotfiles: Vec::new(),
             timestamp: Local::now().to_rfc3339(),
             version: None,
-        }
-    }
-
-    fn with_auth(&self, builder: reqwest::RequestBuilder) -> reqwest::RequestBuilder {
-        if let Some(token) = &self.token {
-            builder.bearer_auth(token)
-        } else {
-            builder
         }
     }
 }

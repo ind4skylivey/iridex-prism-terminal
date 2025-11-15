@@ -94,6 +94,8 @@ async fn status() -> PrismResult<()> {
         } else {
             println!("Remote: {remote}");
         }
+    } else if let Some(error) = status.remote_error {
+        println!("Remote status unavailable: {error}");
     } else {
         println!("Remote status unavailable");
     }

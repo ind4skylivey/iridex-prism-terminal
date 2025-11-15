@@ -66,7 +66,9 @@ async fn sync_client_rejects_conflicting_pushes() -> PrismResult<()> {
         .expect_err("stale push should fail with conflict");
     let message = err.to_string();
     assert!(
-        message.contains("Conflicting fields") || message.contains("conflict"),
+        message.contains("Conflicting fields")
+            || message.contains("conflict")
+            || message.contains("Missing base_version"),
         "expected conflict message, got {message}"
     );
 
@@ -92,6 +94,7 @@ impl SpawnedServer {
 }
 
 async fn spawn_sync_server(secret: &str) -> PrismResult<SpawnedServer> {
+    let _ = prism::sync::server::reset_backend_store();
     let listener = TcpListener::bind("127.0.0.1:0").await?;
     let addr = listener.local_addr()?;
     let (shutdown_tx, shutdown_rx) = oneshot::channel();

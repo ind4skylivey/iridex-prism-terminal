@@ -195,6 +195,7 @@ async fn handle_status(
         local_timestamp: Local::now().to_rfc3339(),
         remote_timestamp,
         remote_version,
+        remote_error: None,
     }))
 }
 
@@ -296,6 +297,14 @@ pub(crate) fn save_persisted_store(store: &PersistedStore) -> PrismResult<()> {
         std::fs::create_dir_all(parent)?;
     }
     std::fs::write(&path, serde_json::to_string_pretty(store)?)?;
+    Ok(())
+}
+
+pub fn reset_backend_store() -> PrismResult<()> {
+    let path = backend_store_path()?;
+    if path.exists() {
+        std::fs::remove_file(path)?;
+    }
     Ok(())
 }
 

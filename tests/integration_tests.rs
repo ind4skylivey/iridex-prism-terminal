@@ -148,6 +148,53 @@ fn sync_server_roundtrip() {
 }
 
 #[test]
+fn sync_status_requires_authentication() {
+    with_isolated_env(|| {
+        std::env::set_var("PRISM_SYNC_JWT_SECRET", "test-secret");
+        let runtime = tokio::runtime::Runtime::new().expect("runtime");
+        runtime.block_on(async {
+            let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
+                .await
+                .expect("listener");
+            let addr = listener.local_addr().expect("addr");
+            let (shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel::<()>();
+            let secret = "test-secret".to_string();
+            let server = tokio::spawn(async move {
+                let _ = prism::sync::server::serve_with_listener(listener, secret, async {
+                    let _ = shutdown_rx.await;
+                })
+                .await;
+            });
+
+            let endpoint = format!("http://{}", addr);
+            let client = prism::sync::SyncClient::new(
+                prism::sync::client::ClientOptions::from(Some(endpoint)),
+                None,
+                Some("test-secret".into()),
+            )
+            .expect("client");
+
+            let status = client
+                .status()
+                .await
+                .expect("status without token should still return fallback");
+            assert!(status.remote_timestamp.is_none());
+            let error = status
+                .remote_error
+                .expect("expected remote error when unauthorized");
+            assert!(
+                error.contains("401"),
+                "expected HTTP 401 in error message, got {error}"
+            );
+
+            let _ = shutdown_tx.send(());
+            let _ = server.await;
+        });
+        std::env::remove_var("PRISM_SYNC_JWT_SECRET");
+    });
+}
+
+#[test]
 fn sync_merges_divergent_pushes() {
     with_isolated_env(|| {
         std::env::set_var("PRISM_SYNC_JWT_SECRET", "test-secret");
