@@ -97,13 +97,9 @@ async fn spawn_sync_server(secret: &str) -> PrismResult<SpawnedServer> {
     let (shutdown_tx, shutdown_rx) = oneshot::channel();
     let secret = secret.to_string();
     let handle = tokio::spawn(async move {
-        serve_with_listener(
-            listener,
-            secret,
-            async move {
-                let _ = shutdown_rx.await;
-            },
-        )
+        serve_with_listener(listener, secret, async move {
+            let _ = shutdown_rx.await;
+        })
         .await
     });
     Ok(SpawnedServer {
@@ -138,8 +134,7 @@ fn sample_dotfile() -> DotfileRecord {
     DotfileRecord {
         name: "prism.zsh".into(),
         original: Some("~/.zshrc".into()),
-        contents: "export PROMPT='%F{cyan}IRIDEX%f '"
-            .to_string(),
+        contents: "export PROMPT='%F{cyan}IRIDEX%f '".to_string(),
         size: Some(32),
         modified: None,
         sha256: None,
