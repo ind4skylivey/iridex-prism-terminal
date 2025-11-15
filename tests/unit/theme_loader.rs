@@ -43,6 +43,18 @@ fn load_theme_by_name_reads_from_theme_root() -> PrismResult<()> {
 }
 
 #[test]
+fn load_theme_by_name_reads_from_user_themes() -> PrismResult<()> {
+    let env = TestEnv::new();
+    env.write_user_theme("Nebula", MINIMAL_THEME);
+
+    let theme = loader::load_theme_by_name("nebula")?;
+
+    assert_eq!(theme.metadata.name, "Nebula");
+    assert_eq!(theme.metadata.author, "Infra");
+    Ok(())
+}
+
+#[test]
 fn load_theme_by_name_errors_for_missing_theme() {
     let _env = TestEnv::new();
     let err = loader::load_theme_by_name("ghost").expect_err("missing theme should error");
