@@ -10,6 +10,7 @@ pub struct SyncState {
     pub last_pull: Option<String>,
     pub last_push: Option<String>,
     pub last_remote: Option<String>,
+    pub last_version: Option<u64>,
 }
 
 pub fn load_state() -> PrismResult<SyncState> {

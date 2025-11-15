@@ -7,13 +7,13 @@ use base64::Engine;
 
 use super::{
     CliContext, DotfileArgs, DotfileCommands, JwtArgs, JwtCommands, SyncArgs, SyncCommands,
-    SyncServeArgs,
+    SyncConfigureArgs, SyncJournalArgs, SyncJournalCommands, SyncServeArgs,
 };
 use crate::core::loader;
 use crate::error::{PrismError, PrismResult};
 use crate::sync::auth;
-use crate::sync::client::{DotfileRecord, SyncClient, SyncData};
-use crate::sync::{dotfiles, history, jwt, server, state};
+use crate::sync::client::{ClientOptions, DotfileRecord, SyncClient, SyncData};
+use crate::sync::{config, dotfiles, history, jwt, server, state};
 use crate::widgets::storage as widget_storage;
 use crate::{ensure_config_dir, user_themes_dir};
 
@@ -27,12 +27,13 @@ pub fn handle_sync(args: SyncArgs, _ctx: &CliContext) -> PrismResult<()> {
         SyncCommands::Push => runtime.block_on(push()),
         SyncCommands::Pull => runtime.block_on(pull()),
         SyncCommands::Status => runtime.block_on(status()),
-        SyncCommands::Configure => configure(),
+        SyncCommands::Configure(args) => configure(args),
         SyncCommands::History => show_history(),
         SyncCommands::Rollback => rollback(),
         SyncCommands::Dotfiles(args) => handle_dotfiles(args),
         SyncCommands::Jwt(args) => handle_jwt(args),
         SyncCommands::Serve(args) => runtime.block_on(run_server(args)),
+        SyncCommands::Journal(args) => handle_journal(args),
     }
 }
 
@@ -41,17 +42,23 @@ async fn push() -> PrismResult<()> {
     let mut state = state::load_state()?;
     let client = sync_client()?;
     let remote_status = client.status().await?;
-    detect_conflict(&state, remote_status.remote_timestamp.clone())?;
-    client.push(snapshot.clone()).await?;
+    detect_conflict(
+        &state,
+        remote_status.remote_version,
+        remote_status.remote_timestamp.clone(),
+    )?;
+    let response = client.push(snapshot.clone(), state.last_version).await?;
     history::record_snapshot("push", &snapshot)?;
     let now = chrono::Local::now().to_rfc3339();
     state.last_push = Some(now);
-    state.last_remote = Some(snapshot.timestamp.clone());
+    state.last_remote = Some(response.timestamp.clone());
+    state.last_version = Some(response.version);
     state::save_state(&state)?;
     println!(
-        "Pushed {} themes and {} dotfiles",
+        "Pushed {} themes and {} dotfiles (remote v{})",
         snapshot.themes.len(),
-        snapshot.dotfiles.len()
+        snapshot.dotfiles.len(),
+        response.version
     );
     Ok(())
 }
@@ -65,6 +72,9 @@ async fn pull() -> PrismResult<()> {
     let now = chrono::Local::now().to_rfc3339();
     state.last_pull = Some(now);
     state.last_remote = Some(payload.timestamp.clone());
+    if let Some(version) = payload.version {
+        state.last_version = Some(version);
+    }
     state::save_state(&state)?;
     println!(
         "Pulled {} themes, {} dotfiles",
@@ -79,14 +89,18 @@ async fn status() -> PrismResult<()> {
     let status = client.status().await?;
     println!("Local: {}", status.local_timestamp);
     if let Some(remote) = status.remote_timestamp {
-        println!("Remote: {remote}");
+        if let Some(version) = status.remote_version {
+            println!("Remote: {remote} (v{version})");
+        } else {
+            println!("Remote: {remote}");
+        }
     } else {
         println!("Remote status unavailable");
     }
     Ok(())
 }
 
-fn configure() -> PrismResult<()> {
+fn configure(args: SyncConfigureArgs) -> PrismResult<()> {
     if let Ok(token) = std::env::var("PRISM_SYNC_TOKEN") {
         auth::write_token(token.trim())?;
         println!("Stored sync token from PRISM_SYNC_TOKEN");
@@ -97,6 +111,57 @@ fn configure() -> PrismResult<()> {
     }
     if auth::resolve_token()?.is_none() {
         println!("Set PRISM_SYNC_TOKEN and rerun `prism sync configure` to persist it.");
+    }
+    let mut current = config::load_config()?;
+    let mut changed = false;
+    if let Some(endpoint) = args.endpoint {
+        let trimmed = endpoint.trim();
+        if trimmed.is_empty() {
+            return Err(PrismError::new("Endpoint URL cannot be empty"));
+        }
+        current.endpoint = Some(trimmed.to_string());
+        println!("Set sync endpoint to {trimmed}");
+        changed = true;
+    } else if args.clear_endpoint {
+        current.endpoint = None;
+        println!("Cleared stored sync endpoint");
+        changed = true;
+    }
+
+    if let Some(bundle) = args.ca_bundle {
+        if !bundle.exists() {
+            return Err(PrismError::new(format!(
+                "CA bundle {} does not exist",
+                bundle.display()
+            )));
+        }
+        let absolute = fs::canonicalize(&bundle).unwrap_or(bundle);
+        current.ca_bundle = Some(absolute.to_string_lossy().into_owned());
+        println!("Stored CA bundle path {}", absolute.display());
+        changed = true;
+    } else if args.clear_ca_bundle {
+        current.ca_bundle = None;
+        println!("Cleared stored CA bundle");
+        changed = true;
+    }
+
+    if args.insecure {
+        current.danger_accept_invalid_certs = true;
+        println!("Enabled danger_accept_invalid_certs (development only)");
+        changed = true;
+    } else if args.no_insecure {
+        current.danger_accept_invalid_certs = false;
+        println!("Disabled danger_accept_invalid_certs");
+        changed = true;
+    }
+
+    if changed {
+        let path = config::save_config(&current)?;
+        println!("Wrote sync config to {}", path.display());
+    }
+
+    if args.show || !changed {
+        print_sync_config(&current)?;
     }
     Ok(())
 }
@@ -181,6 +246,102 @@ fn handle_jwt(args: JwtArgs) -> PrismResult<()> {
     }
 }
 
+fn handle_journal(args: SyncJournalArgs) -> PrismResult<()> {
+    match args.command {
+        SyncJournalCommands::List => list_journal(),
+        SyncJournalCommands::Prune { keep } => prune_journal(keep),
+    }
+}
+
+fn list_journal() -> PrismResult<()> {
+    let path = server::backend_store_path()?;
+    let store = server::load_persisted_store()?;
+    if store.versions().is_empty() {
+        println!(
+            "No backend journal entries recorded yet ({}).",
+            path.display()
+        );
+        return Ok(());
+    }
+    println!("Backend journal stored at {}:", path.display());
+    for snapshot in store.versions() {
+        let version = snapshot.version;
+        let timestamp = &snapshot.payload.timestamp;
+        let themes = snapshot.payload.themes.len();
+        let dotfiles = snapshot.payload.dotfiles.len();
+        let parent = store
+            .delta_for(version)
+            .and_then(|entry| entry.parent)
+            .map(|p| format!("v{p}"))
+            .unwrap_or_else(|| "-".into());
+        let delta_summary = store
+            .delta_for(version)
+            .map(|entry| {
+                format!(
+                    "Δ themes +{}/-{}, dotfiles +{}/-{}, config +{}/-{}",
+                    entry.delta.themes_added.len(),
+                    entry.delta.themes_removed.len(),
+                    entry.delta.dotfiles_upserted.len(),
+                    entry.delta.dotfiles_removed.len(),
+                    entry.delta.config_updates.len(),
+                    entry.delta.config_removed.len()
+                )
+            })
+            .unwrap_or_else(|| "Δ themes +0/-0, dotfiles +0/-0, config +0/-0".into());
+        println!(
+            "- v{version} @ {timestamp} (parent {parent}) :: {themes} themes, {dotfiles} dotfiles | {delta_summary}"
+        );
+    }
+    Ok(())
+}
+
+fn prune_journal(keep: usize) -> PrismResult<()> {
+    let path = server::backend_store_path()?;
+    let mut store = server::load_persisted_store()?;
+    let before = store.versions().len();
+    if before == 0 {
+        println!("No backend entries to prune ({}).", path.display());
+        return Ok(());
+    }
+    store.prune_to_latest(keep);
+    server::save_persisted_store(&store)?;
+    println!(
+        "Pruned backend journal at {} from {} → {} versions (keep={}).",
+        path.display(),
+        before,
+        store.versions().len(),
+        keep
+    );
+    Ok(())
+}
+
+fn print_sync_config(cfg: &config::SyncConfig) -> PrismResult<()> {
+    let path = config::config_path()?;
+    println!("Sync configuration ({}):", path.display());
+    println!(
+        "  endpoint: {}",
+        cfg.endpoint
+            .as_deref()
+            .unwrap_or("<default: PRISM_SYNC_ENDPOINT or local server>")
+    );
+    println!(
+        "  ca_bundle: {}",
+        cfg.ca_bundle
+            .as_deref()
+            .unwrap_or("<system trust store or PRISM_SYNC_CA_BUNDLE>")
+    );
+    println!(
+        "  danger_accept_invalid_certs: {}",
+        if cfg.danger_accept_invalid_certs {
+            "true"
+        } else {
+            "false"
+        }
+    );
+    println!("  env overrides: PRISM_SYNC_TOKEN, PRISM_SYNC_ENDPOINT, PRISM_SYNC_CA_BUNDLE, PRISM_SYNC_INSECURE");
+    Ok(())
+}
+
 async fn run_server(args: SyncServeArgs) -> PrismResult<()> {
     let secret = auth::resolve_jwt_secret()?.ok_or_else(|| {
         PrismError::new(
@@ -225,7 +386,13 @@ fn finalize_destination(path: PathBuf, name: &str) -> PathBuf {
 fn sync_client() -> PrismResult<SyncClient> {
     let token = auth::resolve_token()?;
     let secret = auth::resolve_jwt_secret()?;
-    SyncClient::new(None, token, secret)
+    let cfg = config::load_config()?;
+    let options = ClientOptions {
+        endpoint: cfg.endpoint.clone(),
+        ca_bundle: cfg.ca_bundle.as_deref().map(PathBuf::from),
+        danger_accept_invalid_certs: cfg.danger_accept_invalid_certs,
+    };
+    SyncClient::new(options, token, secret)
 }
 
 fn build_snapshot() -> PrismResult<SyncData> {
@@ -368,12 +535,30 @@ fn selected_dotfiles(snapshot: &SyncData) -> Vec<&DotfileRecord> {
     }
 }
 
-fn detect_conflict(state: &state::SyncState, remote: Option<String>) -> PrismResult<()> {
+fn detect_conflict(
+    state: &state::SyncState,
+    remote_version: Option<u64>,
+    remote_timestamp: Option<String>,
+) -> PrismResult<()> {
     let force = std::env::var(FORCE_ENV).is_ok();
     if force {
         return Ok(());
     }
-    if let Some(remote) = remote {
+    if let Some(remote_version) = remote_version {
+        match state.last_version {
+            Some(local) if local == remote_version => {}
+            Some(_) => {
+                return Err(PrismError::new(
+                    "Remote version advanced. Pull latest or set PRISM_SYNC_FORCE=1 to override.",
+                ))
+            }
+            None => {
+                return Err(PrismError::new(
+                    "No recorded sync version. Pull before pushing or set PRISM_SYNC_FORCE=1.",
+                ))
+            }
+        }
+    } else if let Some(remote) = remote_timestamp {
         if let Some(last_remote) = &state.last_remote {
             if last_remote != &remote {
                 return Err(PrismError::new(

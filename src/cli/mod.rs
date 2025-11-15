@@ -119,12 +119,13 @@ pub enum SyncCommands {
     Push,
     Pull,
     Status,
-    Configure,
+    Configure(SyncConfigureArgs),
     History,
     Rollback,
     Dotfiles(DotfileArgs),
     Jwt(JwtArgs),
     Serve(SyncServeArgs),
+    Journal(SyncJournalArgs),
 }
 
 #[derive(Args, Debug)]
@@ -181,6 +182,24 @@ pub struct SyncServeArgs {
     pub listen: SocketAddr,
 }
 
+#[derive(Args, Debug, Default)]
+pub struct SyncConfigureArgs {
+    #[arg(long, value_name = "URL")]
+    pub endpoint: Option<String>,
+    #[arg(long)]
+    pub clear_endpoint: bool,
+    #[arg(long, value_name = "FILE")]
+    pub ca_bundle: Option<PathBuf>,
+    #[arg(long)]
+    pub clear_ca_bundle: bool,
+    #[arg(long)]
+    pub insecure: bool,
+    #[arg(long = "no-insecure")]
+    pub no_insecure: bool,
+    #[arg(long)]
+    pub show: bool,
+}
+
 #[derive(Args, Debug)]
 pub struct JwtArgs {
     #[command(subcommand)]
@@ -198,6 +217,21 @@ pub enum JwtCommands {
         secret: Option<String>,
         #[arg(long)]
         no_store: bool,
+    },
+}
+
+#[derive(Args, Debug)]
+pub struct SyncJournalArgs {
+    #[command(subcommand)]
+    pub command: SyncJournalCommands,
+}
+
+#[derive(Subcommand, Debug)]
+pub enum SyncJournalCommands {
+    List,
+    Prune {
+        #[arg(long, default_value_t = 20)]
+        keep: usize,
     },
 }
 
