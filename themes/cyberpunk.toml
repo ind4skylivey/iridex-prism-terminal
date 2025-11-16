@@ -1,0 +1,51 @@
+[metadata]
+name = "Neon Circuit"
+author = "ind4skylivey"
+version = "1.0.0"
+description = "Neon-drenched circuits with kinetic widgets and bold contrasts."
+tags = ["neon", "cyberpunk", "glow"]
+
+[colors]
+background = "#050816"
+foreground = "#f8f8ff"
+black = "#0d0f1a"
+red = "#ff1ac6"
+green = "#1affc1"
+yellow = "#ffd55c"
+blue = "#4ae0ff"
+magenta = "#ff6ad5"
+cyan = "#33ffd6"
+white = "#f4f4ff"
+
+[colors.bright]
+black = "#3a3a46"
+red = "#ff49d1"
+green = "#30ffd1"
+yellow = "#ffe28f"
+blue = "#69f2ff"
+magenta = "#ff7dd9"
+cyan = "#6df8da"
+white = "#ffffff"
+
+[prompt]
+style = "powerline"
+show_user = true
+show_host = true
+show_time = true
+show_git = true
+separator = ""
+
+[prompt.segments]
+user = { bg = "#ff1ac6", fg = "#050816", icon = "" }
+path = { bg = "#4ae0ff", fg = "#050816", icon = "" }
+git = { bg = "#33ffd6", fg = "#050816", icon = "" }
+time = { bg = "#ffd55c", fg = "#050816", icon = "" }
+system = { bg = "#1affc1", fg = "#050816", icon = "" }
+
+[widgets]
+enabled = ["git-status", "clock", "system", "docker"]
+
+[context_rules]
+night_theme = "Tokyo Night Nova"
+project_themes.rust = "Neon Circuit"
+project_themes.javascript = "Aurora Pulse"

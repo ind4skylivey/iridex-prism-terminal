@@ -1,0 +1,11 @@
+{
+  "name": "Matrix-Shade",
+  "description": "Green-on-black hacker palette with clean contrast and modern info cues.",
+  "primary": "#7eff7e",
+  "secondary": "#2cf8b4",
+  "accent": "#6aecff",
+  "bg": "#020402",
+  "fg": "#d1ffd1",
+  "error": "#ff5f8f",
+  "success": "#9dfd82"
+}

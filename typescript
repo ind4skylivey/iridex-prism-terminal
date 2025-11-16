@@ -1,0 +1,73 @@
+Script started on 2025-11-15 00:33:55+00:00 [COMMAND="nl -ba tests/unit/cli.rs" <not executed on terminal>]
+     1	use clap::Parser;
+     2	
+     3	use prism::cli::{CliContext, Commands, PrismCli, ShellArg};
+     4	use prism::error::PrismResult;
+     5	
+     6	use super::helpers::TestEnv;
+     7	
+     8	const SAMPLE_THEME: &str = r#"
+     9	[metadata]
+    10	name = "Solstice"
+    11	author = "QA"
+    12	
+    13	[colors]
+    14	background = "#000000"
+    15	foreground = "#ffffff"
+    16	black = "#000000"
+    17	red = "#ff5555"
+    18	green = "#50fa7b"
+    19	yellow = "#f1fa8c"
+    20	blue = "#bd93f9"
+    21	magenta = "#ff79c6"
+    22	cyan = "#8be9fd"
+    23	white = "#bbbbbb"
+    24	
+    25	[colors.bright]
+    26	black = "#4d4d4d"
+    27	red = "#ff6e67"
+    28	green = "#5af78e"
+    29	yellow = "#f4f99d"
+    30	blue = "#caa9fa"
+    31	magenta = "#ff92d0"
+    32	cyan = "#9aedfe"
+    33	white = "#f8f8f2"
+    34	"#;
+    35	
+    36	#[test]
+    37	fn parses_apply_command_with_shell_and_verbose_flags() {
+    38	    let cli = PrismCli::try_parse_from([
+    39	        "prism",
+    40	        "--verbose",
+    41	        "--verbose",
+    42	        "apply",
+    43	        "solstice",
+    44	        "--shell",
+    45	        "zsh",
+    46	    ])
+    47	    .expect("cli parsing");
+    48	
+    49	    assert_eq!(cli.verbose, 2);
+    50	    match cli.command {
+    51	        Commands::Apply(args) => {
+    52	            assert_eq!(args.theme, "solstice");
+    53	            assert!(matches!(args.shell, Some(ShellArg::Zsh)));
+    54	        }
+    55	        other => panic!("expected apply command, got {other:?}"),
+    56	    }
+    57	}
+    58	
+    59	#[test]
+    60	fn cli_context_loads_theme_using_temp_env() -> PrismResult<()> {
+    61	    let env = TestEnv::new();
+    62	    env.write_builtin_theme("Solstice", SAMPLE_THEME);
+    63	
+    64	    let ctx = CliContext::new()?;
+    65	    let theme = ctx.load_theme("solstice")?;
+    66	
+    67	    assert_eq!(theme.metadata.name, "Solstice");
+    68	    assert_eq!(theme.metadata.author, "QA");
+    69	    Ok(())
+    70	}
+
+Script done on 2025-11-15 00:33:55+00:00 [COMMAND_EXIT_CODE="0"]

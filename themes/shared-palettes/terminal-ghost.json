@@ -1,0 +1,11 @@
+{
+  "name": "Terminal-Ghost",
+  "description": "Cool, translucent palette tuned for tiling transparent terminals.",
+  "primary": "#b3c1d4",
+  "secondary": "#899ca6",
+  "accent": "#5dd2ff",
+  "bg": "#030712",
+  "fg": "#dfe6f0",
+  "error": "#ff5f87",
+  "success": "#7ef79d"
+}

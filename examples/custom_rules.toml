@@ -1,0 +1,6 @@
+[context_rules]
+on_git_conflict = "minimal"
+on_high_load = "nord"
+night_theme = "tokyo-night"
+project_themes.rust = "cyberpunk"
+project_themes.python = "dracula"

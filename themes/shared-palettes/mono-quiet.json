@@ -1,0 +1,11 @@
+{
+  "name": "Mono-Quiet",
+  "description": "Sober monochrome palette with a tiny accent for serene focus.",
+  "primary": "#d0d0d0",
+  "secondary": "#a3a3a3",
+  "accent": "#9ad8ff",
+  "bg": "#050505",
+  "fg": "#f3f3f3",
+  "error": "#ff5c63",
+  "success": "#80ffab"
+}

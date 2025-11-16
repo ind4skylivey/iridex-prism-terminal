@@ -1,0 +1,11 @@
+{
+  "name": "Tokyo-Ghost",
+  "description": "Nocturnal vaporwave neon with deep blues and spectral light.",
+  "primary": "#0b1c3f",
+  "secondary": "#473b7b",
+  "accent": "#3ae5ff",
+  "bg": "#030717",
+  "fg": "#e3d9ff",
+  "error": "#ff4b6e",
+  "success": "#74ffea"
+}

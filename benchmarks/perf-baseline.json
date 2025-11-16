@@ -1,0 +1,87 @@
+{
+  "captured_at_utc": "2025-11-15T04:23:52Z",
+  "commands": [
+    "cargo bench --bench prompt -- --sample-size=50 --measurement-time=3",
+    "cargo bench --bench dotfiles -- --sample-size=50 --measurement-time=3",
+    "cargo bench --bench widgets -- --sample-size=50 --measurement-time=3",
+    "cargo bench --bench gallery -- --sample-size=50 --measurement-time=3"
+  ],
+  "criterion": {
+    "directory": "target/criterion",
+    "profile": "bench"
+  },
+  "metrics": {
+    "prompt_generate_zsh": {
+      "mean_ns": 325.2410386253315,
+      "median_ns": 324.75376734714405,
+      "std_dev_ns": 2.3673888270761028,
+      "mean_ci_95": {
+        "lower_ns": 324.6168142386919,
+        "upper_ns": 325.9183565363027
+      }
+    },
+    "prompt_generate_bash": {
+      "mean_ns": 364.2420764064801,
+      "median_ns": 364.14133137362853,
+      "std_dev_ns": 1.7647082590425809,
+      "mean_ci_95": {
+        "lower_ns": 363.7572905333364,
+        "upper_ns": 364.7280698089164
+      }
+    },
+    "prompt_generate_fish": {
+      "mean_ns": 368.8827055742591,
+      "median_ns": 367.5814684512827,
+      "std_dev_ns": 8.226223964527493,
+      "mean_ci_95": {
+        "lower_ns": 366.6948207250518,
+        "upper_ns": 371.2277320856485
+      }
+    },
+    "dotfiles_hash_contents": {
+      "mean_ns": 568.6573369578332,
+      "median_ns": 568.9936209096238,
+      "std_dev_ns": 2.1762400055100666,
+      "mean_ci_95": {
+        "lower_ns": 568.0744541368226,
+        "upper_ns": 569.257077117774
+      }
+    },
+    "dotfiles_load_exclusions": {
+      "mean_ns": 35199.41451792072,
+      "median_ns": 33253.22207840237,
+      "std_dev_ns": 4761.719539815469,
+      "mean_ci_95": {
+        "lower_ns": 34020.954795095,
+        "upper_ns": 36592.39907331653
+      }
+    },
+    "widgets_render_batch": {
+      "mean_ns": 12135.31400662845,
+      "median_ns": 11440.13553279751,
+      "std_dev_ns": 1415.5282308339008,
+      "mean_ci_95": {
+        "lower_ns": 11757.646117147211,
+        "upper_ns": 12533.675055999516
+      }
+    },
+    "gallery_filter_local": {
+      "mean_ns": 53833.42705293183,
+      "median_ns": 53892.97259168388,
+      "std_dev_ns": 344.9436314808513,
+      "mean_ci_95": {
+        "lower_ns": 53735.046163667335,
+        "upper_ns": 53924.78755572304
+      }
+    },
+    "gallery_filter_community": {
+      "mean_ns": 27957.37680758987,
+      "median_ns": 27933.52867647059,
+      "std_dev_ns": 140.51306212094724,
+      "mean_ci_95": {
+        "lower_ns": 27921.73997324337,
+        "upper_ns": 27998.270646524754
+      }
+    }
+  }
+}

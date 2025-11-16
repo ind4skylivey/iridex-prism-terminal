@@ -1,0 +1,11 @@
+{
+  "name": "Aurora-Edge",
+  "description": "Cool blue palette with pink/cyan highlights, tuned for project-state clarity.",
+  "primary": "#a5eaff",
+  "secondary": "#8fb5ff",
+  "accent": "#ff9ece",
+  "bg": "#091026",
+  "fg": "#f0f8ff",
+  "error": "#ff4c7c",
+  "success": "#80ffb8"
+}

@@ -1,0 +1,11 @@
+{
+  "name": "ERROR_808",
+  "description": "Glitchy crimson and neon error tones leaning into digital distortion.",
+  "primary": "#ff3f55",
+  "secondary": "#ffd866",
+  "accent": "#84ffff",
+  "bg": "#050505",
+  "fg": "#f6f6f6",
+  "error": "#ff1a00",
+  "success": "#19ff8c"
+}

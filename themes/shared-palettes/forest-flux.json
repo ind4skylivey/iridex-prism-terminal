@@ -1,0 +1,11 @@
+{
+  "name": "Forest-Flux",
+  "description": "Calm greens and ambers inspired by forests, optimized for extended sessions.",
+  "primary": "#a4c29a",
+  "secondary": "#6f8c4a",
+  "accent": "#f7c97f",
+  "bg": "#1f2922",
+  "fg": "#e8f5dd",
+  "error": "#ff8a65",
+  "success": "#8bf397"
+}

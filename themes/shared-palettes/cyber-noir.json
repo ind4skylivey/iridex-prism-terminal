@@ -1,0 +1,11 @@
+{
+  "name": "Cyber-Noir",
+  "description": "High-contrast neon palette with magenta, cyan, and electric yellow accents.",
+  "primary": "#ff5fe0",
+  "secondary": "#44ddff",
+  "accent": "#ffc94f",
+  "bg": "#05010b",
+  "fg": "#f0f5ff",
+  "error": "#ff3860",
+  "success": "#8dff6e"
+}

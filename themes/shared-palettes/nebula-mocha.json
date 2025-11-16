@@ -1,0 +1,11 @@
+{
+  "name": "Nebula-Mocha",
+  "description": "Velvety dark palette with mocha warmth and pastel glow for meditative focus.",
+  "primary": "#ddb6f2",
+  "secondary": "#a6adcd",
+  "accent": "#f5c2e7",
+  "bg": "#1f1d2e",
+  "fg": "#f5e0dc",
+  "error": "#ff6f91",
+  "success": "#c3e88d"
+}
