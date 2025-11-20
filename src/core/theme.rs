@@ -26,6 +26,23 @@ pub struct Theme {
 impl Theme {
     pub fn load(path: &Path) -> PrismResult<Self> {
         let raw = fs::read_to_string(path)?;
+        // Try parsing as TOML first
+        if let Ok(mut theme) = toml::from_str::<Theme>(&raw) {
+            theme.normalize();
+            theme.validate()?;
+            return Ok(theme);
+        }
+
+        // If TOML fails, and it looks like JSON, try JSON
+        // This is a fallback for shared palettes if they are loaded through this path
+        // although shared palettes usually go through shared_palette loader.
+        if let Ok(mut theme) = serde_json::from_str::<Theme>(&raw) {
+            theme.normalize();
+            theme.validate()?;
+            return Ok(theme);
+        }
+
+        // Re-attempt TOML to get the specific error if JSON also failed
         let mut theme: Theme = toml::from_str(&raw)?;
         theme.normalize();
         theme.validate()?;

@@ -103,6 +103,14 @@ fn push_paths(
                 .map(|s| s == "toml")
                 .unwrap_or(false)
         {
+            // Skip example/template TOMLs if they are not actual themes
+            let filename = entry.file_name().to_string_lossy();
+            if filename == "Cargo.toml"
+                || filename == "custom_rules.toml"
+                || filename == "custom_theme.toml"
+            {
+                continue;
+            }
             output.push((entry.path().to_path_buf(), source));
         }
     }
