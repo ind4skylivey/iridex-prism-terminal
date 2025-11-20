@@ -54,8 +54,8 @@ fn load_builtin_themes() {
             // Only attempt to load/validate TOML themes in this integration test
             // Raw JSON palettes are handled by catalog loader which converts them to themes internally
             if entry.path.extension().map(|s| s == "toml").unwrap_or(false) {
-               let theme = Theme::load(&entry.path).expect("load theme");
-               theme.validate().expect("validate");
+                let theme = Theme::load(&entry.path).expect("load theme");
+                theme.validate().expect("validate");
             }
         }
     });
