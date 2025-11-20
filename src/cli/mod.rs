@@ -6,10 +6,10 @@ use crate::error::{PrismError, PrismResult};
 use crate::themes::ThemeId;
 use crate::{ensure_config_dir, user_themes_dir};
 
-pub mod init;
 pub mod apply;
 pub mod dev;
 pub mod info;
+pub mod init;
 pub mod list;
 
 #[derive(Parser, Debug)]
@@ -43,7 +43,10 @@ pub enum PrismCommand {
 
 #[derive(Args, Debug)]
 pub struct InitArgs {
-    #[arg(long, help = "Undo the initialization (remove Prism from shell config)")]
+    #[arg(
+        long,
+        help = "Undo the initialization (remove Prism from shell config)"
+    )]
     pub undo: bool,
 
     #[arg(long, help = "Purge the configuration directory (only with --undo)")]
@@ -94,18 +97,14 @@ pub fn run(cli: PrismCli) -> PrismResult<()> {
             let catalog = load_catalog()?;
             handle_preview(&catalog, args)
         }
-        PrismCommand::Dev(args) => {
-            dev::handle_dev(args)
-        }
+        PrismCommand::Dev(args) => dev::handle_dev(args),
     }
 }
-
-
 
 pub fn handle_apply(catalog: &ThemeCatalog, args: ApplyArgs) -> PrismResult<()> {
     let entry = resolve_theme(catalog, &args.theme)?;
     apply::apply_theme(&entry.theme)?;
-    
+
     println!(
         "Applied {} ({}):",
         entry.theme.meta.name, entry.theme.meta.slug
@@ -126,10 +125,6 @@ fn handle_preview(catalog: &ThemeCatalog, args: PreviewArgs) -> PrismResult<()> 
     }
     Ok(())
 }
-
-
-
-
 
 fn resolve_theme<'catalog>(
     catalog: &'catalog ThemeCatalog,

@@ -46,7 +46,7 @@ pub fn themes_root() -> PrismResult<PathBuf> {
 
     // Otherwise, use the managed directory in ~/.config/prism/themes
     let managed_dir = ensure_config_dir()?.join("themes");
-    
+
     // Check if we need to extract (if empty or missing)
     // We check for a marker file or just "shared-palettes"
     if !managed_dir.join("shared-palettes").exists() {
@@ -58,19 +58,19 @@ pub fn themes_root() -> PrismResult<PathBuf> {
 
 fn extract_embedded_themes(target: &Path) -> PrismResult<()> {
     use crate::assets::ThemeAssets;
-    
+
     // println!("Extracting built-in themes to {}...", target.display());
-    
+
     for file in ThemeAssets::iter() {
         let content = ThemeAssets::get(file.as_ref()).unwrap();
         let path = target.join(file.as_ref());
-        
+
         if let Some(parent) = path.parent() {
             std::fs::create_dir_all(parent)?;
         }
         std::fs::write(&path, content.data)?;
     }
-    
+
     Ok(())
 }
 

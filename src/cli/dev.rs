@@ -13,16 +13,19 @@ use crate::themes::ThemeId;
 pub fn handle_dev(args: DevArgs) -> PrismResult<()> {
     // 1. Initial load to find the file path
     let catalog = load_catalog()?;
-    let entry = catalog.resolve(&args.theme).ok_or_else(|| {
-        PrismError::new(format!("Theme '{}' not found", args.theme))
-    })?;
+    let entry = catalog
+        .resolve(&args.theme)
+        .ok_or_else(|| PrismError::new(format!("Theme '{}' not found", args.theme)))?;
 
     let theme_path = entry.palette_path.clone();
     let theme_id = entry.theme.meta.id;
 
     println!("Δ Prism Dev Mode");
     println!("  Watching: {}", theme_path.display());
-    println!("  Theme:    {} ({})", entry.theme.meta.name, entry.theme.meta.slug);
+    println!(
+        "  Theme:    {} ({})",
+        entry.theme.meta.name, entry.theme.meta.slug
+    );
     println!("  Press Ctrl+C to exit.");
 
     // 2. Setup Watcher
@@ -43,13 +46,13 @@ pub fn handle_dev(args: DevArgs) -> PrismResult<()> {
                         // We only care about Write or Create (if re-created)
                         // notify 6.0 events are a bit generic, usually Modify(Data)
                         if event.kind.is_modify() || event.kind.is_create() {
-                            // Debounce slightly by sleeping? 
+                            // Debounce slightly by sleeping?
                             // Better: just try to reload.
                             // If editors save atomically (rename), we might get Create.
-                            
+
                             // Give FS a moment to settle
                             std::thread::sleep(Duration::from_millis(100));
-                            
+
                             match reload_and_apply(theme_id, &theme_path) {
                                 Ok(name) => println!("  Δ Reloaded: {}", name),
                                 Err(e) => eprintln!("  ! Error reloading: {}", e),
@@ -74,14 +77,14 @@ fn reload_and_apply(id: ThemeId, _path: &Path) -> PrismResult<String> {
     // Optimization: We could just parse the specific file if we refactored catalog loading,
     // but loading 15 JSONs is fast enough for dev mode.
     let catalog = load_catalog()?;
-    
+
     // Find the theme again by ID (slug might have changed? unlikely for dev mode on same file)
     // But if we are editing "Custom", ID is Custom.
-    let entry = catalog.get(id).ok_or_else(|| {
-        PrismError::new("Theme disappeared from catalog (parsing error?)")
-    })?;
+    let entry = catalog
+        .get(id)
+        .ok_or_else(|| PrismError::new("Theme disappeared from catalog (parsing error?)"))?;
 
     apply_theme(&entry.theme)?;
-    
+
     Ok(entry.theme.meta.name.clone())
 }

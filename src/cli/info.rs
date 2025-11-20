@@ -1,5 +1,5 @@
-use std::path::Path;
 use colored::Colorize;
+use std::path::Path;
 
 use crate::catalog::ThemeCatalog;
 use crate::cli::resolve_theme;
@@ -12,7 +12,11 @@ pub fn handle_info(catalog: &ThemeCatalog, args: DevArgs) -> PrismResult<()> {
     let meta = &theme.meta;
 
     let dot_color = hex_to_rgb(&theme.palette.base[1]).unwrap_or((255, 255, 255));
-    println!("\n{}  {}", "●".truecolor(dot_color.0, dot_color.1, dot_color.2), meta.name.bold().underline());
+    println!(
+        "\n{}  {}",
+        "●".truecolor(dot_color.0, dot_color.1, dot_color.2),
+        meta.name.bold().underline()
+    );
     println!("   {}", meta.slug.dimmed());
 
     if !meta.description.is_empty() {
@@ -27,7 +31,7 @@ pub fn handle_info(catalog: &ThemeCatalog, args: DevArgs) -> PrismResult<()> {
     if let Some(term) = &meta.recommended_terminal {
         println!("  {:<12} {}", "Terminal:", term);
     }
-    
+
     println!("\n{}", "FILES".bold());
     println!("  {:<12} {}", "Palette:", entry.palette_path.display());
     // Check for docs
@@ -45,7 +49,7 @@ pub fn handle_info(catalog: &ThemeCatalog, args: DevArgs) -> PrismResult<()> {
         print_swatch(color);
     }
     println!();
-    
+
     // Show accents
     print!("  Accents: ");
     for color in &theme.palette.accents {
@@ -53,7 +57,10 @@ pub fn handle_info(catalog: &ThemeCatalog, args: DevArgs) -> PrismResult<()> {
     }
     println!();
 
-    println!("\nRun {} to apply this theme.", format!("prism apply {}", meta.slug).cyan());
+    println!(
+        "\nRun {} to apply this theme.",
+        format!("prism apply {}", meta.slug).cyan()
+    );
 
     Ok(())
 }
@@ -69,7 +76,9 @@ fn print_swatch(hex: &str) {
 
 fn hex_to_rgb(hex: &str) -> Option<(u8, u8, u8)> {
     let hex = hex.trim_start_matches('#');
-    if hex.len() != 6 { return None; }
+    if hex.len() != 6 {
+        return None;
+    }
     let r = u8::from_str_radix(&hex[0..2], 16).ok()?;
     let g = u8::from_str_radix(&hex[2..4], 16).ok()?;
     let b = u8::from_str_radix(&hex[4..6], 16).ok()?;
@@ -80,9 +89,9 @@ fn find_docs_path(palette_path: &Path, slug: &str) -> Option<std::path::PathBuf>
     // Assuming docs are in ../../docs/<slug>.md relative to palette file
     // palette_path is .../themes/shared-palettes/<slug>.json
     // we want .../docs/<slug>.md
-    
+
     // Go up two levels from palette file
-    let root = palette_path.parent()?.parent()?; 
+    let root = palette_path.parent()?.parent()?;
     let doc = root.join("docs").join(format!("{}.md", slug));
     if doc.exists() {
         Some(doc)
