@@ -1,25 +1,33 @@
-# Nebula-Mocha: pastel powerline stream
-nebula_mocha_prompt() {
-  local exit_status=$?
-  local primary='%F{#ddb6f2}'
-  local secondary='%F{#a6adcd}'
-  local accent='%F{#f5c2e7}'
-  local fg='%F{#f5e0dc}'
-  local success='%F{#c3e88d}'
-  local error='%F{#ff6f91}'
-  local status_color=$success
-  if [[ $exit_status -ne 0 ]]; then
-    status_color=$error
+# =============================================================================
+# PRISM TERMINAL: Nebula-Mocha
+# Description: Cozy cosmic theme with powerline bubbles
+# Generated for: Zsh 5.8+
+# =============================================================================
+
+prism_git_status() {
+  local branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+  if [[ -n "$branch" ]]; then
+    local dirty=$(git status --porcelain 2>/dev/null)
+    echo -n "%K{#967bb6}%F{#f5f5dc} 🌌 $branch %k%f"
+    
+    if [[ -n "$dirty" ]]; then
+      echo -n "%F{#d2b48c}☕ %f"
+    fi
   fi
-  local branch
-  branch=$(git -C "$PWD" symbolic-ref --short HEAD 2>/dev/null)
-  local dirty
-  dirty=$(git -C "$PWD" status --porcelain 2>/dev/null)
-  local git_line=''
-  if [[ -n $branch ]]; then
-    git_line="${accent} ${branch}${dirty:+ ✦}"
-  fi
-  PS1="${secondary}╭─ ${primary}%n@%m ${accent} ${fg}%~\n"
-  PS1+="${secondary}╰─ ${git_line:+${git_line} }${status_color}${exit_status} ${fg}→ ${fg}"
 }
-add-zsh-hook precmd nebula_mocha_prompt
+
+prism_prompt() {
+  local right_sep=""
+  
+  echo
+  echo -n "%F{#6f4e37}$right_sep%K{#6f4e37}%F{#f5f5dc} ☁ %k%f"
+  echo -n "%K{#967bb6}%F{#6f4e37}$right_sep%K{#967bb6}%F{#f5f5dc} %n %k%f"
+  echo -n "%K{#d2b48c}%F{#967bb6}$right_sep%K{#d2b48c}%F{#6f4e37} %1~ %k%f"
+  echo -n "%K{#967bb6}%F{#d2b48c}$right_sep$(prism_git_status)"
+  echo -n "%F{#967bb6}$right_sep%f"
+  echo
+  echo -n "%(?.%F{#967bb6}⋆｡°✩.%F{#6f4e37}☾) %f"
+}
+
+setopt PROMPT_SUBST
+PROMPT='$(prism_prompt)'

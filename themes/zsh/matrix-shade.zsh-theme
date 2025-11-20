@@ -1,28 +1,49 @@
-# Matrix-Shade: green-on-black prompt
-matrix_shade_prompt() {
-  local exit_status=$?
-  local primary='%F{#7eff7e}'
-  local secondary='%F{#2cf8b4}'
-  local accent='%F{#6aecff}'
-  local error='%F{#ff5f8f}'
-  local success='%F{#9dfd82}'
-  local status_color=$success
-  local symbol='■'
-  if [[ $exit_status -ne 0 ]]; then
-    status_color=$error
-    symbol='✖'
+# =============================================================================
+# PRISM TERMINAL: Matrix-Shade
+# Description: Elite hacker terminal - cybersecurity aesthetics
+# Generated for: Zsh 5.8+
+# =============================================================================
+
+prism_git_status() {
+  local branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+  if [[ -n "$branch" ]]; then
+    local dirty=$(git status --porcelain 2>/dev/null)
+    echo -n "%K{black}%F{green}[GIT::%B$branch%b%F{green}"
+    
+    if [[ -n "$dirty" ]]; then
+      echo -n "%F{red}::MODIFIED"
+    else
+      echo -n "%F{green}::CLEAN"
+    fi
+    
+    echo -n "]%k%f"
   fi
-  local duration=$(($(date +%s) - ${LAST_COMMAND_START_TIME:-0}))
-  local vi_mode=${KEYMAP:-main}
-  local branch
-  branch=$(git -C "$PWD" symbolic-ref --short HEAD 2>/dev/null)
-  local dirty
-  dirty=$(git -C "$PWD" status --porcelain 2>/dev/null)
-  local git_line=''
-  if [[ -n $branch ]]; then
-    git_line="${secondary}${branch}${dirty:+*}"
-  fi
-  PS1="${primary}╔═ ${accent}%~ ${git_line:+(${git_line}) }${primary}║${symbol} ${status_color}${exit_status} ${secondary}[${vi_mode}] ${accent}${duration}s${primary}\n"
 }
-autoload -U add-zsh-hook
-add-zsh-hook precmd matrix_shade_prompt
+
+prism_prompt() {
+  echo
+  echo -n "%K{black}%F{green}"
+  
+  # Status indicator
+  echo -n "%(?.%F{green}[●SECURE] .%F{red}[✖BREACH] %F{green})"
+  
+  # User@Host
+  echo -n "[ROOT::%B%n@%m%b] "
+  
+  # Directory
+  echo -n "[PATH::%B%F{white}%1~%F{green}%b] "
+  
+  # Git
+  echo -n "$(prism_git_status)"
+  
+  echo -n "%k%f"
+  echo
+  
+  # Line 2: Command Input
+  echo -n "%F{green}┌─[%B%F{green}TERMINAL%b%F{green}]"
+  echo
+  echo -n "└─► %f"
+}
+
+setopt PROMPT_SUBST
+PROMPT='$(prism_prompt)'

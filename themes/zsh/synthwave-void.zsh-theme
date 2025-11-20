@@ -1,28 +1,39 @@
-# Synthwave-Void: neon block prompt
-synthwave_void_prompt() {
-  local exit_status=$?
-  local primary='%F{#f4a7ff}'
-  local secondary='%F{#62e8ff}'
-  local accent='%F{#ffe066}'
-  local fg='%F{#f8f8ff}'
-  local success='%F{#93ff88}'
-  local error='%F{#ff4e75}'
-  local status_color=$success
-  local symbol='★'
-  if [[ $exit_status -ne 0 ]]; then
-    status_color=$error
-    symbol='✖'
+# =============================================================================
+# PRISM TERMINAL: Synthwave-Void
+# Description: Retro-cyberpunk sunset with neon grid aesthetics
+# Generated for: Zsh 5.8+
+# =============================================================================
+
+prism_git_status() {
+  local branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+  if [[ -n "$branch" ]]; then
+    local dirty=$(git status --porcelain 2>/dev/null)
+    echo -n "%K{magenta}%F{black}  $branch %k%f"
+    
+    if [[ -n "$dirty" ]]; then
+      echo -n "%F{yellow}⚡ %f"
+    fi
   fi
-  local branch
-  branch=$(git -C "$PWD" symbolic-ref --short HEAD 2>/dev/null)
-  local dirty
-  dirty=$(git -C "$PWD" status --porcelain 2>/dev/null)
-  local git_line=''
-  if [[ -n $branch ]]; then
-    git_line="${secondary}${branch}${dirty:+*}"
-  fi
-  PS1="${secondary}╭${accent}═${primary}◈ ${secondary}%n@%m ${accent} ${fg}%~\n"
-  PS1+="${secondary}╰${accent}═ ${git_line:+${git_line} }${status_color}${symbol}${exit_status:+ ${exit_status}} ${accent}↝ ${fg}"
 }
-autoload -U add-zsh-hook
-add-zsh-hook precmd synthwave_void_prompt
+
+prism_prompt() {
+  echo
+  
+  # Line 1: Retro Grid with Sunset
+  echo -n "%F{magenta}▓▒░ "
+  echo -n "%K{#1a0033}%F{yellow} 🌆 %k%f"
+  echo -n "%K{cyan}%F{black} %n %k%f"
+  echo -n "%F{magenta} ▸ "
+  echo -n "%K{magenta}%F{black} %1~ %k%f"
+  echo -n "$(prism_git_status)"
+  echo -n "%F{magenta} ░▒▓%f"
+  
+  echo
+  
+  # Line 2: Neon Prompt
+  echo -n "%F{magenta}╰─%F{cyan}═%F{yellow}═%F{magenta}► "
+  echo -n "%(?.%F{cyan}◆.%F{red}✖) %f"
+}
+
+setopt PROMPT_SUBST
+PROMPT='$(prism_prompt)'

@@ -1,25 +1,32 @@
-# Terminal-Ghost: ultra-cool monochrome prompt
-terminal_ghost_prompt() {
-  local exit_status=$?
-  local primary='%F{#b3c1d4}'
-  local secondary='%F{#899ca6}'
-  local accent='%F{#5dd2ff}'
-  local fg='%F{#dfe6f0}'
-  local success='%F{#7ef79d}'
-  local error='%F{#ff5f87}'
-  local status_color=$success
-  local symbol='●'
-  if [[ $exit_status -ne 0 ]]; then
-    status_color=$error
-    symbol='✦'
+# =============================================================================
+# PRISM TERMINAL: Terminal-Ghost
+# Description: Minimal ghostly theme with subtle bubble segments
+# Generated for: Zsh 5.8+
+# =============================================================================
+
+prism_git_status() {
+  local branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+  if [[ -n "$branch" ]]; then
+    local dirty=$(git status --porcelain 2>/dev/null)
+    echo -n "%K{#4a4a4a}%F{#e0e0e0}  $branch %k%f"
+    
+    if [[ -n "$dirty" ]]; then
+      echo -n "%F{#ffaa00}● %f"
+    fi
   fi
-  local branch
-  branch=$(git -C "$PWD" symbolic-ref --short HEAD 2>/dev/null)
-  local git_line=''
-  if [[ -n $branch ]]; then
-    git_line="${accent}[${branch}]"
-  fi
-  PS1="${primary}%n@%m ${secondary}%~${git_line:+ ${git_line}} ${status_color}${symbol}${exit_status:+ ${exit_status}} ${accent}› ${fg}"
 }
-autoload -U add-zsh-hook
-add-zsh-hook precmd terminal_ghost_prompt
+
+prism_prompt() {
+  local right_sep=""
+  
+  echo
+  echo -n "%F{#2a2a2a}$right_sep%K{#2a2a2a}%F{#e0e0e0} 👻 %k%f"
+  echo -n "%K{#4a4a4a}%F{#2a2a2a}$right_sep%K{#4a4a4a}%F{#f0f0f0} %1~ %k%f"
+  echo -n "%K{#3a3a3a}%F{#4a4a4a}$right_sep%K{#3a3a3a}$(prism_git_status)"
+  echo -n "%F{#3a3a3a}$right_sep%f"
+  echo
+  echo -n "%(?.%F{#808080}❯.%F{#ff5555}❯) %f"
+}
+
+setopt PROMPT_SUBST
+PROMPT='$(prism_prompt)'
