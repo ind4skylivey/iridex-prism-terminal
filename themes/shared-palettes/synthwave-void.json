@@ -1,0 +1,11 @@
+{
+  "name": "Synthwave-Void",
+  "description": "Dark neon palette with violet/cyan accents and retro-block energy.",
+  "primary": "#f4a7ff",
+  "secondary": "#62e8ff",
+  "accent": "#ffe066",
+  "bg": "#090014",
+  "fg": "#f8f8ff",
+  "error": "#ff4e75",
+  "success": "#93ff88"
+}

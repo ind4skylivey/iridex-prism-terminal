@@ -1,0 +1,49 @@
+[metadata]
+name = "Tokyo Night Nova"
+author = "ind4skylivey"
+version = "1.0.0"
+description = "Deep Tokyo neon with chromed metallic edges and sharper contrast."
+tags = ["tokyo night", "cyber", "sharp"]
+
+[colors]
+background = "#04050c"
+foreground = "#e0def4"
+black = "#080921"
+red = "#ff6188"
+green = "#a9ffcb"
+yellow = "#ffd86f"
+blue = "#64d9ff"
+magenta = "#c792ea"
+cyan = "#8be9fd"
+white = "#f8f8f8"
+
+[colors.bright]
+black = "#1f1c2f"
+red = "#ff85a8"
+green = "#c0ffd9"
+yellow = "#ffe8a8"
+blue = "#98e5ff"
+magenta = "#d7a8ff"
+cyan = "#b5fff8"
+white = "#ffffff"
+
+[prompt]
+style = "powerline"
+show_user = true
+show_host = false
+show_time = true
+show_git = true
+separator = ""
+
+[prompt.segments]
+focus = { bg = "#64d9ff", fg = "#04050c", icon = "⏤" }
+flux = { bg = "#ff6188", fg = "#04050c", icon = "⟡" }
+glow = { bg = "#c792ea", fg = "#04050c", icon = "✧" }
+
+[widgets]
+enabled = ["git-status", "clock", "system", "docker"]
+
+[context_rules]
+night_theme = "Tokyo Night Nova"
+project_themes.web = "Tokyo Night Nova"
+project_themes.java = "Neon Circuit"

@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Aurora Borealis",
+    "author": "glasswolf",
+    "description": "A neon palette inspired by the northern lights.",
+    "tags": ["neon", "green", "glow"],
+    "source": "community"  
+  },
+  {
+    "name": "Velvet Midnight",
+    "author": "prism-community",
+    "description": "Soft purples with contrast for low-light coding sessions.",
+    "tags": ["purple", "low-light"],
+    "source": "community"
+  },
+  {
+    "name": "Solar Flare",
+    "author": "sunrise-team",
+    "description": "Bright golds and oranges for high-energy workflows.",
+    "tags": ["warm", "bright"],
+    "source": "community"
+  }
+]

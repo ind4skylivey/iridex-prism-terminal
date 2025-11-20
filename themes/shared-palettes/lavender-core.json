@@ -1,0 +1,11 @@
+{
+  "name": "Lavender-Core",
+  "description": "Ethereal soft neon palette for anime-tech tranquility.",
+  "primary": "#f6d0ff",
+  "secondary": "#c9b6ff",
+  "accent": "#82f7ff",
+  "bg": "#1c1830",
+  "fg": "#f8f6ff",
+  "error": "#ff6f91",
+  "success": "#a8ff8c"
+}

@@ -1,0 +1,49 @@
+[metadata]
+name = "Aurora Pulse"
+author = "ind4skylivey"
+version = "1.0.0"
+description = "Iridescent aurora lights with slow neon pulses for calm focus."
+tags = ["aurora", "gradient", "focus"]
+
+[colors]
+background = "#050a14"
+foreground = "#f5f7ff"
+black = "#090f1c"
+red = "#ff4d8f"
+green = "#95f3d9"
+yellow = "#ffe77a"
+blue = "#6fc4ff"
+magenta = "#d881f9"
+cyan = "#63f7ff"
+white = "#fefefe"
+
+[colors.bright]
+black = "#1c2331"
+red = "#ff81b9"
+green = "#baf7df"
+yellow = "#ffeaa1"
+blue = "#a5ceff"
+magenta = "#e6a5ff"
+cyan = "#9bf3ff"
+white = "#ffffff"
+
+[prompt]
+style = "powerline"
+show_user = true
+show_host = false
+show_time = true
+show_git = true
+separator = ""
+
+[prompt.segments]
+wake = { bg = "#95f3d9", fg = "#050a14", icon = "⟰" }
+pulse = { bg = "#63f7ff", fg = "#050a14", icon = "⟳" }
+flare = { bg = "#d881f9", fg = "#050a14", icon = "✦" }
+
+[widgets]
+enabled = ["git-status", "system", "clock"]
+
+[context_rules]
+night_theme = "Tokyo Night Nova"
+project_themes.haskell = "Aurora Pulse"
+project_themes.go = "Aurora Pulse"

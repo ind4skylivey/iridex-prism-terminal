@@ -1,0 +1,12 @@
+{
+  "name": "Arch-Vortex",
+  "description": "A swirling fusion of Arch Linux blue and Catppuccin lavender.",
+  "primary": "#1793d1",
+  "secondary": "#cba6f7",
+  "accent": "#89b4fa",
+  "bg": "#14161b",
+  "fg": "#cdd6f4",
+  "error": "#f38ba8",
+  "success": "#a6e3a1"
+}
+

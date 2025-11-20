@@ -1,0 +1,66 @@
+[package]
+name = "prism"
+version = "0.1.1"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "PRISM: Terminal aesthetic manager with live preview, context-aware theming, widgets, and cloud sync"
+authors = ["ind4skylivey <dev@ind4skylivey.local>"]
+repository = "https://example.com/iridex"
+
+[features]
+default = []
+ai_small_model = []
+
+[dependencies]
+clap = { version = "4.4", features = ["derive"] }
+colored = "2.1"
+indicatif = "0.17"
+toml = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+dirs = "5.0"
+regex = "1.10"
+walkdir = "2.4"
+git2 = "0.18"
+sysinfo = "0.30"
+chrono = "0.4"
+ratatui = "0.26"
+crossterm = "0.27"
+tokio = { version = "1.35", features = ["full"] }
+async-trait = "0.1"
+reqwest = { version = "0.11", features = ["json"] }
+jsonwebtoken = "9.2"
+base64 = "0.21"
+anyhow = "1.0"
+thiserror = "1.0"
+log = "0.4"
+env_logger = "0.11"
+sha2 = "0.10"
+hex = "0.4"
+axum = "0.7"
+notify = "6.1"
+rust-embed = "8.0"
+dialoguer = "0.11"
+console = "0.15"
+
+[dev-dependencies]
+criterion = "0.5"
+tempfile = "3.8"
+mockall = "0.12"
+serial_test = "2.0"
+
+[[bench]]
+name = "prompt"
+harness = false
+
+[[bench]]
+name = "dotfiles"
+harness = false
+
+[[bench]]
+name = "widgets"
+harness = false
+
+[[bench]]
+name = "gallery"
+harness = false

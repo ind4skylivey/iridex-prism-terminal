@@ -1,0 +1,11 @@
+{
+  "name": "Midnight-Warp",
+  "description": "Balanced dark palette tailored for sleek modern terminals with clean alignment and right-aligned info.",
+  "primary": "#8bd9ff",
+  "secondary": "#576bff",
+  "accent": "#d38cff",
+  "bg": "#050821",
+  "fg": "#f6f9ff",
+  "error": "#ff5e7a",
+  "success": "#7ef3a2"
+}

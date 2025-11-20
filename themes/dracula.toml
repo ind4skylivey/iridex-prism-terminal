@@ -1,0 +1,50 @@
+[metadata]
+name = "Catppuccin Velvet"
+author = "ind4skylivey"
+version = "1.0.0"
+description = "Lavender pastels, plush gradients, and a velvet glow."
+tags = ["catppuccin", "pastel", "aesthetic"]
+
+[colors]
+background = "#1e1b2f"
+foreground = "#f5e0dc"
+black = "#1f1c2b"
+red = "#f28fad"
+green = "#abe9b3"
+yellow = "#f8bd96"
+blue = "#96cdfb"
+magenta = "#f5c2e7"
+cyan = "#89dceb"
+white = "#f8f8f2"
+
+[colors.bright]
+black = "#3c334b"
+red = "#ffb5d3"
+green = "#c2fad8"
+yellow = "#ffe5b9"
+blue = "#c5e7ff"
+magenta = "#ffd9f5"
+cyan = "#b8f1ff"
+white = "#ffffff"
+
+[prompt]
+style = "powerline"
+show_user = true
+show_host = false
+show_time = true
+show_git = true
+separator = ""
+
+[prompt.segments]
+vibe = { bg = "#f5c2e7", fg = "#1e1b2f", icon = "" }
+glow = { bg = "#96cdfb", fg = "#1e1b2f", icon = "✨" }
+tide = { bg = "#cba6f7", fg = "#1e1b2f", icon = "" }
+still = { bg = "#abe9b3", fg = "#1e1b2f", icon = "" }
+
+[widgets]
+enabled = ["git-status", "clock", "system"]
+
+[context_rules]
+night_theme = "Tokyo Night Nova"
+project_themes.python = "Catppuccin Velvet"
+project_themes.design = "Catppuccin Velvet"

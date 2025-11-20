@@ -1,0 +1,11 @@
+{
+  "name": "Glitch-Grid",
+  "description": "Sharp glitch palette with magenta, lime, and cyan over a deep grid background.",
+  "primary": "#ff55ff",
+  "secondary": "#0effd7",
+  "accent": "#f1ff5b",
+  "bg": "#050200",
+  "fg": "#f1f1f1",
+  "error": "#ff1a57",
+  "success": "#75ff8d"
+}

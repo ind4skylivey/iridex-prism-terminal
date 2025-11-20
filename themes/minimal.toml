@@ -1,0 +1,49 @@
+[metadata]
+name = "Glasswave Minimal"
+author = "ind4skylivey"
+version = "1.0.0"
+description = "Soft glass edges and a violet rim for focus-first terminals."
+tags = ["glass", "minimal", "calm"]
+
+[colors]
+background = "#070911"
+foreground = "#e7e6ff"
+black = "#0b0f1f"
+red = "#ff7b91"
+green = "#7df4d8"
+yellow = "#f5d88e"
+blue = "#8cadff"
+magenta = "#c28cff"
+cyan = "#7bd6ff"
+white = "#fefefe"
+
+[colors.bright]
+black = "#2a2b3f"
+red = "#ff9fb3"
+green = "#a9ffe3"
+yellow = "#ffe5a5"
+blue = "#a7c8ff"
+magenta = "#dab2ff"
+cyan = "#9be0ff"
+white = "#ffffff"
+
+[prompt]
+style = "powerline"
+show_user = true
+show_host = false
+show_time = true
+show_git = true
+separator = ""
+
+[prompt.segments]
+focus = { bg = "#8cadff", fg = "#070911", icon = "❖" }
+calm = { bg = "#7df4d8", fg = "#070911", icon = "═" }
+glint = { bg = "#f5d88e", fg = "#070911", icon = "•" }
+
+[widgets]
+enabled = ["clock"]
+
+[context_rules]
+night_theme = "Glasswave Minimal"
+project_themes.go = "Glasswave Minimal"
+project_themes.rust = "Neon Circuit"
