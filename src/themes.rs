@@ -314,8 +314,5 @@ pub struct Theme {
 
 /// Normalizes any user-provided theme key (slug, name, etc.).
 pub fn normalize_theme_key(value: &str) -> String {
-    value
-        .trim()
-        .to_lowercase()
-        .replace(['_', ' '], "-")
+    value.trim().to_lowercase().replace(['_', ' '], "-")
 }
