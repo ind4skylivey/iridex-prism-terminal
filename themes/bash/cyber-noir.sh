@@ -1,52 +1,52 @@
-# Cyber-Noir Bash prompt
-cyber_noir_battery() {
-  if [[ -f /sys/class/power_supply/BAT0/capacity ]]; then
-    cat /sys/class/power_supply/BAT0/capacity 2>/dev/null
-  fi
-}
+# =============================================================================
+# PRISM TERMINAL: Cyber-Noir
+# Description: Neon-soaked cyberpunk theme with bubble segments
+# Generated for: Bash 5.0+
+# =============================================================================
 
-cyber_noir_load() {
-  uptime | awk -F'load average:' '{print $2}' | cut -d',' -f1 | awk '{print $1}'
-}
+# Colors
+PRISM_PRIMARY='#ff5fe0'
+PRISM_SECONDARY='#44ddff'
+PRISM_ACCENT='#ffc94f'
 
-cyber_noir_git() {
-  local branch dirty
-  branch=$(git -C "$PWD" symbolic-ref --short HEAD 2>/dev/null)
-  dirty=$(git -C "$PWD" status --porcelain 2>/dev/null)
-  if [[ -n $branch ]]; then
-    if [[ -n $dirty ]]; then
-      printf " %s *" "$branch"
-    else
-      printf " %s" "$branch"
+prism_git_status() {
+  local branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+  if [[ -n "$branch" ]]; then
+    local dirty=$(git status --porcelain 2>/dev/null)
+    echo -en " \033[48;2;255;0;255m\033[38;2;0;0;0m  $branch \033[0m"
+    if [[ -n "$dirty" ]]; then
+      echo -en "\033[38;2;255;255;0m⚡ \033[0m"
     fi
   fi
 }
 
-cyber_noir_docker() {
-  if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
-    printf ""
-  fi
+prism_prompt() {
+  local right_sep=""
+  
+  PS1="\n"
+  # Segment 1: Time (Deep Purple bg)
+  PS1+="\[\033[38;2;95;0;175m\]$right_sep"
+  PS1+="\[\033[48;2;95;0;175m\033[38;2;0;255;255m\] \t \033[0m"
+  
+  # Segment 2: User@Host (Magenta bg)
+  PS1+="\[\033[48;2;255;0;255m\033[38;2;95;0;175m\]$right_sep"
+  PS1+="\[\033[48;2;255;0;255m\033[38;2;0;0;0m\] \u@\h \033[0m"
+  
+  # Segment 3: Directory (Cyan bg)
+  PS1+="\[\033[48;2;0;255;255m\033[38;2;255;0;255m\]$right_sep"
+  PS1+="\[\033[48;2;0;255;255m\033[38;2;0;0;0m\] \W \033[0m"
+  
+  # Segment 4: Git (Magenta bg)
+  PS1+="\[\033[48;2;255;0;255m\033[38;2;0;255;255m\]$right_sep"
+  PS1+="\$(prism_git_status)"
+  
+  # End
+  PS1+="\[\033[38;2;255;0;255m\]$right_sep\033[0m"
+  
+  PS1+="\n"
+  
+  # Prompt line
+  PS1+="\[\$(if [ \$? -eq 0 ]; then echo '\033[38;2;0;255;255m'; else echo '\033[38;2;255;0;0m'; fi)\]❯ \[\033[0m\]"
 }
 
-cyber_noir_prompt() {
-  local exit_status=$?
-  local primary="\[\e[35m\]"
-  local secondary="\[\e[36m\]"
-  local accent="\[\e[33m\]"
-  local success="\[\e[32m\]"
-  local error="\[\e[91m\]"
-  local status_color=$success
-  local status_symbol="✔"
-  if [[ $exit_status -ne 0 ]]; then
-    status_color=$error
-    status_symbol="✖"
-  fi
-  local time_seg=$(date +%H:%M)
-  local load_seg=$(cyber_noir_load)
-  local battery=$(cyber_noir_battery)
-  local git_line=$(cyber_noir_git)
-  local docker_line=$(cyber_noir_docker)
-  PS1="${secondary}╭─ ${primary}time:${time_seg} ${accent}• ${secondary}load:${load_seg} ${accent}• ${secondary}${battery:+bat:${battery}} ${accent}${docker_line:+${docker_line}}\n"
-  PS1+="${secondary}╰─ ${primary}\u@\h ${accent} \w ${git_line:+${secondary}(${git_line}) }${status_color}${status_symbol}${exit_status:+ ${exit_status}} ${accent}↺ ${primary}"
-}
-PROMPT_COMMAND=cyber_noir_prompt
+PROMPT_COMMAND=prism_prompt

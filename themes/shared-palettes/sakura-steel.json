@@ -1,0 +1,12 @@
+{
+  "name": "Sakura-Steel",
+  "description": "Soft cherry blossoms falling on cold titanium steel.",
+  "primary": "#ffb7b2",
+  "secondary": "#ff9aa2",
+  "accent": "#e2f0cb",
+  "bg": "#2e3440",
+  "fg": "#d8dee9",
+  "error": "#ff6961",
+  "success": "#b5ead7"
+}
+

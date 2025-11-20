@@ -1,3 +1,5 @@
+pub mod assets;
+pub mod catalog;
 pub mod cli;
 pub mod context;
 pub mod core;
@@ -5,6 +7,7 @@ pub mod daemon;
 pub mod error;
 pub mod prompt_stream;
 pub mod sync;
+pub mod themes;
 pub mod tui;
 pub mod widgets;
 
@@ -35,12 +38,40 @@ pub fn themes_root() -> PrismResult<PathBuf> {
     }
 
     let cwd = std::env::current_dir()?;
-    let candidate = cwd.join("themes");
-    if candidate.exists() {
-        Ok(candidate)
-    } else {
-        Ok(cwd)
+    let local_candidate = cwd.join("themes");
+    // If we are in the repo (dev mode), use local files
+    if local_candidate.exists() && local_candidate.join("shared-palettes").exists() {
+        return Ok(local_candidate);
     }
+
+    // Otherwise, use the managed directory in ~/.config/prism/themes
+    let managed_dir = ensure_config_dir()?.join("themes");
+    
+    // Check if we need to extract (if empty or missing)
+    // We check for a marker file or just "shared-palettes"
+    if !managed_dir.join("shared-palettes").exists() {
+        extract_embedded_themes(&managed_dir)?;
+    }
+
+    Ok(managed_dir)
+}
+
+fn extract_embedded_themes(target: &Path) -> PrismResult<()> {
+    use crate::assets::ThemeAssets;
+    
+    // println!("Extracting built-in themes to {}...", target.display());
+    
+    for file in ThemeAssets::iter() {
+        let content = ThemeAssets::get(file.as_ref()).unwrap();
+        let path = target.join(file.as_ref());
+        
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+        std::fs::write(&path, content.data)?;
+    }
+    
+    Ok(())
 }
 
 pub fn data_dir() -> PrismResult<PathBuf> {

@@ -1,39 +1,95 @@
-# Matrix-Shade Fish prompt
-function matrix_shade_git
-    set branch (command git -C $PWD symbolic-ref --short HEAD ^/dev/null)
-    if test -n "$branch"
-        set dirty (command git -C $PWD status --porcelain ^/dev/null)
-        if test -n "$dirty"
-            echo "$branch*"
-        else
-            echo "$branch"
-        end
-    end
-end
+# Matrix-Shade Fish Prompt
+# Elite hacker terminal - cybersecurity aesthetics
 
-function matrix_shade_duration
-    if test -n "$LAST_COMMAND_STARTED_AT"
-        echo (math "scale=0; ($FISH_TIMER - $LAST_COMMAND_STARTED_AT)")s
-    else
-        echo 0s
+function _ms_git_status
+    if not command -v git >/dev/null
+        return
     end
+    
+    set -l branch (command git symbolic-ref --short HEAD 2>/dev/null)
+    if test -z "$branch"
+        return
+    end
+
+    set -l dirty (command git status --porcelain 2>/dev/null)
+    
+    # Git segment with black background
+    set_color -b 000000
+    set_color 00ff00
+    echo -n "[GIT::"
+    set_color -o 00ff00
+    echo -n "$branch"
+    set_color normal
+    set_color -b 000000
+    set_color 00ff00
+    
+    if test -n "$dirty"
+        set_color ff0000
+        echo -n "::MODIFIED"
+    else
+        set_color 00ff00
+        echo -n "::CLEAN"
+    end
+    
+    echo -n "]"
+    set_color -b normal
 end
 
 function fish_prompt
-    set -l exit_status $status
-    set -l accent (set_color --cyan)
-    set -l secondary (set_color --green)
-    set -l error (set_color --red)
-    set -l success (set_color --green)
-    set -l status_color $success
-    set -l symbol '■'
-    if test $exit_status -ne 0
-        set status_color $error
-        set symbol '✖'
+    set -l last_status $status
+    
+    echo
+    
+    # Line 1: System Status Bar
+    set_color -b 000000
+    set_color 00ff00
+    
+    # Status indicator
+    if test $last_status -eq 0
+        echo -n "[●SECURE] "
+    else
+        set_color ff0000
+        echo -n "[✖BREACH] "
+        set_color 00ff00
     end
-    set -l duration (matrix_shade_duration)
-    set -l git_line (matrix_shade_git)
-    set -l vi_mode (set -q KEYMAP; and echo $KEYMAP; or echo main)
-    printf '%s %s %s %s\n' $secondary'╔═' $accent'%~' $secondary'|' $accent"${git_line:-no-git}"
-    printf '%s %s %s %s %s\n' $secondary'╚═' $status_color"${symbol} ${exit_status}" $accent"[${vi_mode}]" $secondary"${duration}" (set_color --reset)
+    
+    # User@Host
+    echo -n "[ROOT::"
+    set_color -o 00ff00
+    echo -n "$USER@"(hostname)
+    set_color normal
+    set_color -b 000000
+    set_color 00ff00
+    echo -n "] "
+    
+    # Directory
+    echo -n "[PATH::"
+    set_color -o ffffff
+    echo -n (prompt_pwd)
+    set_color normal
+    set_color -b 000000
+    set_color 00ff00
+    echo -n "] "
+    
+    # Git
+    _ms_git_status
+    
+    set_color -b normal
+    
+    echo
+    
+    # Line 2: Command Input
+    set_color 00ff00
+    echo -n "┌─["
+    set_color -o 00ff00
+    echo -n "TERMINAL"
+    set_color normal
+    set_color 00ff00
+    echo -n "]"
+    echo
+    echo -n "└─► "
+    
+    set_color normal
 end
+
+

@@ -1,0 +1,12 @@
+{
+  "name": "Eclipse-Protocol",
+  "description": "Solar corona flares erupting from the absolute void.",
+  "primary": "#ffd700",
+  "secondary": "#ffa500",
+  "accent": "#ffffff",
+  "bg": "#000000",
+  "fg": "#e0e0e0",
+  "error": "#ff0000",
+  "success": "#00ff00"
+}
+

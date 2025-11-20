@@ -1,0 +1,12 @@
+{
+  "name": "Obsidian-Forge",
+  "description": "A volcanic theme forging molten copper accents against obsidian rock.",
+  "primary": "#d65d0e",
+  "secondary": "#af3a03",
+  "accent": "#fabd2f",
+  "bg": "#0b0c0e",
+  "fg": "#a8a8b2",
+  "error": "#cc241d",
+  "success": "#98971a"
+}
+

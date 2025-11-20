@@ -1,43 +1,52 @@
-# Matrix-Shade Bash prompt
-matrix_shade_precmd() {
-  MATRIX_SHADE_START=$(date +%s)
-}
-trap 'matrix_shade_precmd' DEBUG
+# =============================================================================
+# PRISM TERMINAL: Matrix-Shade
+# Description: Elite hacker terminal - cybersecurity aesthetics
+# Generated for: Bash 5.0+
+# =============================================================================
 
-matrix_shade_git() {
-  local branch dirty
-  branch=$(git -C "$PWD" symbolic-ref --short HEAD 2>/dev/null)
-  dirty=$(git -C "$PWD" status --porcelain 2>/dev/null)
-  if [[ -n $branch ]]; then
-    if [[ -n $dirty ]]; then
-      printf "%s*" "$branch"
+prism_git_status() {
+  local branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+  if [[ -n "$branch" ]]; then
+    local dirty=$(git status --porcelain 2>/dev/null)
+    echo -en "\033[48;2;0;0;0m\033[38;2;0;255;0m[GIT::"
+    echo -en "\033[1;38;2;0;255;0m$branch\033[0m"
+    echo -en "\033[48;2;0;0;0m\033[38;2;0;255;0m"
+    
+    if [[ -n "$dirty" ]]; then
+      echo -en "\033[38;2;255;0;0m::MODIFIED"
     else
-      printf "%s" "$branch"
+      echo -en "\033[38;2;0;255;0m::CLEAN"
     fi
-  else
-    printf "no-git"
+    
+    echo -en "]\033[0m"
   fi
 }
 
-matrix_shade_duration() {
-  local now=$(date +%s)
-  if [[ -n $MATRIX_SHADE_START ]]; then
-    echo "${now:-0} - ${MATRIX_SHADE_START}" | bc
-  else
-    echo 0
-  fi
+prism_prompt() {
+  PS1="\n"
+  
+  # Line 1: System Status Bar
+  PS1+="\[\033[48;2;0;0;0m\033[38;2;0;255;0m\]"
+  
+  # Status indicator
+  PS1+="\$(if [ \$? -eq 0 ]; then echo '[●SECURE] '; else echo '\[\033[38;2;255;0;0m\][✖BREACH] \[\033[38;2;0;255;0m\]'; fi)"
+  
+  # User@Host
+  PS1+="[ROOT::\[\033[1;38;2;0;255;0m\]\u@\h\[\033[0;48;2;0;0;0m\033[38;2;0;255;0m\]] "
+  
+  # Directory
+  PS1+="[PATH::\[\033[1;38;2;255;255;255m\]\W\[\033[0;48;2;0;0;0m\033[38;2;0;255;0m\]] "
+  
+  # Git
+  PS1+="\$(prism_git_status)"
+  
+  PS1+="\[\033[0m\]"
+  
+  PS1+="\n"
+  
+  # Line 2: Command Input
+  PS1+="\[\033[38;2;0;255;0m\]┌─[\[\033[1;38;2;0;255;0m\]TERMINAL\[\033[0;38;2;0;255;0m\]]\n"
+  PS1+="└─► \[\033[0m\]"
 }
 
-matrix_shade_prompt() {
-  local exit_status=$?
-  local status_color="\[\e[32m\]"
-  local symbol="■"
-  if [[ $exit_status -ne 0 ]]; then
-    status_color="\[\e[91m\]"
-    symbol="✖"
-  fi
-  local duration=$(matrix_shade_duration)
-  PS1="\[\e[32m\]╔═ \[\e[36m\]\u@\h \[\e[32m\]$(matrix_shade_git)\n"
-  PS1+="\[\e[32m\]╚═ ${status_color}${symbol} ${exit_status} \[\e[35m\][${duration}s] \[\e[0m\]"
-}
-PROMPT_COMMAND=matrix_shade_prompt
+PROMPT_COMMAND=prism_prompt

@@ -1,52 +1,83 @@
-# Cyber-Noir Fish prompt
-function cyber_noir_battery
-    if test -f /sys/class/power_supply/BAT0/capacity
-        cat /sys/class/power_supply/BAT0/capacity 2>/dev/null | tr -d '\n' && printf '%%'
-    end
-end
+# Cyber-Noir Fish Prompt
+# A neon-soaked cyberpunk theme with bubble segments
 
-function cyber_noir_git
-    set branch (command git -C $PWD symbolic-ref --short HEAD ^/dev/null)
-    if test -n "$branch"
-        set dirty (command git -C $PWD status --porcelain ^/dev/null)
-        if test -n "$dirty"
-            echo " $branch *"
-        else
-            echo " $branch"
-        end
+function _cn_git_status
+    if not command -v git >/dev/null
+        return
     end
-end
-
-function cyber_noir_load
-    uptime | awk -F'load average:' '{print $2}' | cut -d',' -f1 | awk '{print $1}'
-end
-
-function cyber_noir_docker
-    if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1
-        echo ''
+    
+    set -l branch (command git symbolic-ref --short HEAD 2>/dev/null)
+    if test -z "$branch"
+        return
     end
+
+    set -l dirty (command git status --porcelain 2>/dev/null)
+    
+    set_color -b magenta
+    set_color black
+    echo -n "  $branch "
+    
+    if test -n "$dirty"
+        set_color yellow
+        echo -n "⚡ "
+    end
+    
+    set_color normal
 end
 
 function fish_prompt
-    set -l exit_status $status
-    set -l primary (set_color --magenta)
-    set -l secondary (set_color --cyan)
-    set -l accent (set_color --yellow)
-    set -l error (set_color --red)
-    set -l success (set_color --green)
-    set -l status_color $success
-    set -l symbol '✔'
-    if test $exit_status -ne 0
-        set status_color $error
-        set symbol '✖'
+    set -l last_status $status
+    
+    # Powerline symbols
+    set -l right_sep ""
+    
+    echo
+    
+    # Segment 1: Time (Deep Purple bg)
+    set_color 5f00af
+    echo -n ""
+    set_color -b 5f00af
+    set_color cyan
+    echo -n " "(date +%H:%M:%S)" "
+    
+    # Segment 2: User@Host (Magenta bg)
+    set_color -b magenta
+    set_color 5f00af
+    echo -n "$right_sep"
+    set_color -b magenta
+    set_color black
+    echo -n " $USER@"(hostname)" "
+    
+    # Segment 3: Directory (Cyan bg)
+    set_color -b cyan
+    set_color magenta
+    echo -n "$right_sep"
+    set_color -b cyan
+    set_color black
+    echo -n " "(prompt_pwd)" "
+    
+    # Segment 4: Git (Magenta bg)
+    set_color -b magenta
+    set_color cyan
+    echo -n "$right_sep"
+    
+    _cn_git_status
+    
+    # End
+    set_color -b normal
+    set_color magenta
+    echo -n "$right_sep"
+    
+    echo
+    
+    # Prompt line
+    if test $last_status -eq 0
+        set_color cyan
+        echo -n "❯ "
+    else
+        set_color red
+        echo -n "❯ "
     end
-    set -l time_seg (date +%H:%M)
-    set -l load_seg (cyber_noir_load)
-    set -l batt_seg (cyber_noir_battery)
-    set -l git_line (cyber_noir_git)
-    set -l docker_line (cyber_noir_docker)
-    set -l user (whoami)
-    set -l host (hostname)
-    printf '%s %s %s %s %s%s\n' $primary"╭─" $secondary"time:${time_seg}" $accent"load:${load_seg}" $secondary"${batt_seg:+bat:${batt_seg}}" $accent"${docker_line:+${docker_line}}"
-    printf '%s %s %s %s %s\n' $primary"╰─" $secondary"${user}@${host}" $accent"%c" $secondary"${git_line:-no-git}" $status_color"${symbol}${exit_status:+ ${exit_status}}"
+    
+    set_color normal
 end

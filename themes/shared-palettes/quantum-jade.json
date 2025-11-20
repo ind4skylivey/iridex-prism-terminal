@@ -1,0 +1,12 @@
+{
+  "name": "Quantum-Jade",
+  "description": "Imperial jade tones meeting quantum field theory.",
+  "primary": "#00a86b",
+  "secondary": "#00cc99",
+  "accent": "#20b2aa",
+  "bg": "#0d1117",
+  "fg": "#b3b9b8",
+  "error": "#ff5555",
+  "success": "#50fa7b"
+}
+

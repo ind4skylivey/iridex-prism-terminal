@@ -1,30 +1,71 @@
-# Glitch-Grid Fish prompt
-function glitch_grid_git
-    set branch (command git -C $PWD symbolic-ref --short HEAD ^/dev/null)
-    if test -n "$branch"
-        set dirty (command git -C $PWD status --porcelain ^/dev/null)
-        echo "${branch}${dirty:+ ●}"
+# Glitch-Grid Fish Prompt
+# A chaotic, cyberpunk glitch theme
+
+function _gg_git_status
+    if not command -v git >/dev/null
+        return
+    end
+    
+    set -l branch (command git symbolic-ref --short HEAD 2>/dev/null)
+    if test -z "$branch"
+        return
+    end
+
+    set -l dirty (command git status --porcelain 2>/dev/null)
+    
+    set_color cyan
+    echo -n "  "
+    set_color --reverse cyan
+    echo -n " $branch "
+    set_color normal
+    
+    if test -n "$dirty"
+        set_color red
+        echo -n " ▓▒░ ERROR"
     end
 end
 
 function fish_prompt
-    set -l exit_status $status
-    set -l primary (set_color --magenta)
-    set -l accent (set_color --yellow)
-    set -l secondary (set_color --cyan)
-    set -l error (set_color --red --reverse)
-    set -l success (set_color --green)
-    set -l symbol '⚡'
-    if test $exit_status -ne 0
-        set symbol '✖'
-        printf '%s ERROR %s
-' $error $secondary
+    set -l last_status $status
+    
+    # Palette
+    set -l c_prim (set_color magenta)
+    set -l c_sec (set_color cyan)
+    set -l c_err (set_color red)
+    set -l c_reset (set_color normal)
+    
+    echo
+    
+    # Hostname with "glitch" brackets
+    set_color magenta
+    echo -n "█▓▒░ "
+    set_color --bold white
+    echo -n (hostname)
+    set_color magenta
+    echo -n " ░▒▓█"
+    
+    echo
+    
+    # Directory
+    set_color cyan
+    echo -n "  └─► "
+    set_color --bold cyan
+    echo -n (prompt_pwd)
+    
+    # Git
+    _gg_git_status
+    
+    echo
+    
+    # Prompt Symbol
+    if test $last_status -eq 0
+        set_color --bold yellow
+        echo -n "⚡ "
     else
-        printf '%s GRID %s
-' $primary $accent
+        set_color --bold red
+        echo -n "💀 "
     end
-    printf '%s %s %s ' $secondary'▌' (set_color --white)(pwd)
-    printf '%s ' (set_color --cyan)(glitch_grid_git)
-    printf '%s %s
-' $success"${symbol}${exit_status}" (set_color --reset)
+    
+    set_color normal
 end
+

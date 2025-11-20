@@ -1,29 +1,54 @@
-# Mono-Quiet Fish prompt
-function mono_quiet_git
-    set branch (command git -C $PWD symbolic-ref --short HEAD ^/dev/null)
-    if test -n "$branch"
-        set dirty (command git -C $PWD status --porcelain ^/dev/null)
-        if test -n "$dirty"
-            printf "[%s*]" $branch
-        else
-            printf "[%s]" $branch
-        end
+# Mono-Quiet Fish Prompt
+# A minimalist, high-tech monochrome theme
+
+function _mq_git_status
+    if not command -v git >/dev/null
+        return
+    end
+    
+    set -l branch (command git symbolic-ref --short HEAD 2>/dev/null)
+    if test -z "$branch"
+        return
+    end
+
+    set -l dirty (command git status --porcelain 2>/dev/null)
+    
+    set_color 808080
+    echo -n " :: $branch"
+    
+    if test -n "$dirty"
+        set_color ffffff
+        echo -n " •"
     end
 end
 
 function fish_prompt
-    set -l exit_status $status
-    set -l accent (set_color --cyan)
-    set -l error (set_color --red)
-    set -l success (set_color --green)
-    set -l status_color $success
-    if test $exit_status -ne 0
-        set status_color $error
+    set -l last_status $status
+    
+    # Palette
+    set -l c_white (set_color ffffff)
+    set -l c_grey (set_color 808080)
+    set -l c_dark (set_color 333333)
+    
+    echo
+    
+    # Clean Path
+    set_color -o ffffff
+    echo -n (prompt_pwd)
+    
+    # Git
+    _mq_git_status
+    
+    echo
+    
+    # Minimal Prompt
+    if test $last_status -eq 0
+        set_color 808080
+        echo -n "──○ "
+    else
+        set_color ffffff
+        echo -n "──● "
     end
-    set -l git_line (mono_quiet_git)
-    printf '%s ' (set_color --white)(pwd)
-    if test -n "$git_line"
-        printf '%s ' $git_line
-    end
-    printf '%s%d %s\n' $status_color $exit_status $accent'»'
+    
+    set_color normal
 end

@@ -1,31 +1,69 @@
-# Forest-Flux Fish prompt
-function forest_flux_git
-    set branch (command git -C $PWD symbolic-ref --short HEAD ^/dev/null)
-    if test -n "$branch"
-        set dirty (command git -C $PWD status --porcelain ^/dev/null)
-        if test -n "$dirty"
-            echo "$branch *"
-        else
-            echo "$branch"
-        end
+# Forest-Flux Fish Prompt
+# A distinct, nature-inspired theme with a unique layout
+
+function _ff_git_status
+    if not command -v git >/dev/null
+        return
+    end
+    
+    set -l branch (command git symbolic-ref --short HEAD 2>/dev/null)
+    if test -z "$branch"
+        return
+    end
+
+    set -l dirty (command git status --porcelain 2>/dev/null)
+    
+    # Git Branch with Leaf symbol
+    set_color green
+    echo -n " 🌿 $branch"
+    
+    if test -n "$dirty"
+        set_color yellow
+        echo -n " 🍂"
     end
 end
 
 function fish_prompt
-    set -l exit_status $status
-    set -l accent (set_color --yellow)
-    set -l secondary (set_color --green)
-    set -l error (set_color --red)
-    set -l success (set_color --green)
-    set -l status_color $success
-    set -l symbol '✔'
-    if test $exit_status -ne 0
-        set status_color $error
-        set symbol '✖'
+    set -l last_status $status
+    
+    # Palette
+    set -l c_path (set_color --bold green)
+    set -l c_arrow (set_color yellow)
+    set -l c_dim (set_color 555)
+    set -l c_reset (set_color normal)
+    
+    echo
+    
+    # Unique "Path" style:  ~ > src > cli
+    set_color green
+    echo -n (prompt_pwd) | sed 's/\// > /g'
+    
+    # Git Status
+    _ff_git_status
+    
+    # Duration (if long)
+    if test "$CMD_DURATION" -gt 2000
+        set_color 555
+        set -l secs (math "$CMD_DURATION / 1000")
+        echo -n " took $secs"s
     end
-    set -l time_seg (date +%H:%M)
-    set -l git_line (forest_flux_git)
-    printf '%s %s %s\n' $secondary'╭' $accent"time:${time_seg}" $secondary'%n@%m'
-    printf '%s %s %s ' $secondary'╰' $accent"%c" $secondary"${git_line:+${git_line}}"
-    printf '%s%s %s\n' $status_color $symbol $exit_status
+    
+    # Right side info (Time)
+    set_color 555
+    echo -n "  "
+    echo -n (date +%H:%M)
+    
+    echo
+    
+    # Prompt Symbol (Tree/Sprout)
+    if test $last_status -eq 0
+        set_color --bold green
+        echo -n "🌱 "
+    else
+        set_color --bold red
+        echo -n "🥀 "
+    end
+    
+    set_color normal
 end
+

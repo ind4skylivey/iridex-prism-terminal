@@ -1,41 +1,82 @@
-# Midnight-Warp Fish prompt
-function midnight_warp_git
-    set branch (command git -C $PWD symbolic-ref --short HEAD ^/dev/null)
-    if test -n "$branch"
-        set dirty (command git -C $PWD status --porcelain ^/dev/null)
-        if test -n "$dirty"
-            printf "[%s*]" $branch
-        else
-            printf "[%s]" $branch
-        end
-    end
-end
+# Midnight-Warp Fish Prompt
+# A deep space travel theme
 
-function midnight_warp_prompt
-    set -l exit_status $status
-    set -l primary (set_color --cyan)
-    set -l secondary (set_color --blue)
-    set -l accent (set_color --magenta)
-    set -l error (set_color --red)
-    set -l success (set_color --green)
-    set -l status_color $success
-    set -l symbol '✔'
-    if test $exit_status -ne 0
-        set status_color $error
-        set symbol '✖'
+function _mw_git_status
+    if not command -v git >/dev/null
+        return
     end
-    set -l git_line (midnight_warp_git)
-    set -l time_seg (date +%H:%M)
-    printf '%s %s %s %s %s\n' $primary'╭' $accent"time:${time_seg}" $secondary'%n@%m' (set_color --white)'\n'
-    printf '%s %s %s ' $secondary'╰' (set_color --white)"%c" (set_color --cyan)$git_line
-    printf '%s%s %s\n' $status_color $symbol $exit_status
-end
+    
+    set -l branch (command git symbolic-ref --short HEAD 2>/dev/null)
+    if test -z "$branch"
+        return
+    end
 
-function fish_right_prompt
-    set -l time_seg (date +%H:%M)
-    printf '%s%s' (set_color --blue)"${time_seg}" (set_color --reset)
+    set -l dirty (command git status --porcelain 2>/dev/null)
+    
+    set_color blue
+    echo -n " ☄ $branch"
+    
+    if test -n "$dirty"
+        set_color red
+        echo -n " 💥"
+    end
 end
 
 function fish_prompt
-    midnight_warp_prompt
+    set -l last_status $status
+    
+    # Palette
+    set -l c_star (set_color white)
+    set -l c_void (set_color blue)
+    set -l c_warp (set_color cyan)
+    set -l c_dim (set_color 555)
+    
+    echo
+    
+    # Line 1: Starfield
+    set_color blue
+    echo -n "✨ "
+    
+    set_color cyan
+    echo -n "╭─"
+    
+    set_color blue
+    echo -n " $USER "
+    
+    set_color cyan
+    echo -n "─"
+    
+    set_color white
+    echo -n " 🚀 "
+    
+    set_color cyan
+    echo -n "─"
+    
+    set_color blue
+    echo -n " "(prompt_pwd)" "
+    
+    _mw_git_status
+    
+    echo
+    
+    # Line 2: Warp trail
+    set_color cyan
+    echo -n "╰─"
+    
+    if test $last_status -eq 0
+        set_color --bold white
+        echo -n "🪐 "
+    else
+        set_color red
+        echo -n "🌑 "
+    end
+    
+    set_color normal
 end
+
+function fish_right_prompt
+    set_color 555
+    date +%H:%M
+    set_color normal
+end
+

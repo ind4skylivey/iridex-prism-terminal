@@ -1,31 +1,76 @@
-# Terminal-Ghost Fish prompt
-function terminal_ghost_git
-    set branch (command git -C $PWD symbolic-ref --short HEAD ^/dev/null)
-    if test -n "$branch"
-        printf "[%s]" $branch
+# Terminal-Ghost Fish Prompt
+# A minimal, ghostly theme with subtle bubble segments
+
+function _tg_git_status
+    if not command -v git >/dev/null
+        return
     end
+    
+    set -l branch (command git symbolic-ref --short HEAD 2>/dev/null)
+    if test -z "$branch"
+        return
+    end
+
+    set -l dirty (command git status --porcelain 2>/dev/null)
+    
+    set_color -b 4a4a4a
+    set_color e0e0e0
+    echo -n "  $branch "
+    
+    if test -n "$dirty"
+        set_color ffaa00
+        echo -n "● "
+    end
+    
+    set_color normal
 end
 
 function fish_prompt
-    set -l exit_status $status
-    set -l accent (set_color --cyan)
-    set -l error (set_color --red)
-    set -l success (set_color --green)
-    set -l status_color $success
-    set -l symbol '●'
-    if test $exit_status -ne 0
-        set status_color $error
-        set symbol '✦'
+    set -l last_status $status
+    
+    # Powerline symbols
+    set -l right_sep ""
+    
+    echo
+    
+    # Segment 1: Ghost Icon (Dark bg)
+    set_color 2a2a2a
+    echo -n ""
+    set_color -b 2a2a2a
+    set_color e0e0e0
+    echo -n " 👻 "
+    
+    # Segment 2: Directory (Grey bg)
+    set_color -b 4a4a4a
+    set_color 2a2a2a
+    echo -n "$right_sep"
+    set_color -b 4a4a4a
+    set_color f0f0f0
+    echo -n " "(prompt_pwd)" "
+    
+    # Segment 3: Git (Darker grey bg)
+    set_color -b 3a3a3a
+    set_color 4a4a4a
+    echo -n "$right_sep"
+    set_color -b 3a3a3a
+    
+    _tg_git_status
+    
+    # End
+    set_color -b normal
+    set_color 3a3a3a
+    echo -n "$right_sep"
+    
+    echo
+    
+    # Prompt line
+    if test $last_status -eq 0
+        set_color 808080
+        echo -n "❯ "
+    else
+        set_color ff5555
+        echo -n "❯ "
     end
-    set -l git_line (terminal_ghost_git)
-    set -l user (whoami)
-    set -l host (hostname)
-    printf '%s %s %s ' (set_color --white)"$user@$host" (set_color --magenta)"%c" (set_color --reset)
-    if test -n "$git_line"
-        printf '%s ' $accent"$git_line"
-    end
-    printf '%s%s %s
-' $status_color $symbol $exit_status
-    printf '%s› %s
-' $accent (set_color --white)
+    
+    set_color normal
 end
