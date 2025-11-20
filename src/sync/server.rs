@@ -286,11 +286,13 @@ pub(crate) fn backend_store_path() -> PrismResult<PathBuf> {
     Ok(metadata_dir()?.join(STORAGE_FILE))
 }
 
+#[allow(dead_code)]
 pub(crate) fn load_persisted_store() -> PrismResult<PersistedStore> {
     let path = backend_store_path()?;
     read_store(&path)
 }
 
+#[allow(dead_code)]
 pub(crate) fn save_persisted_store(store: &PersistedStore) -> PrismResult<()> {
     let path = backend_store_path()?;
     if let Some(parent) = path.parent() {
@@ -414,10 +416,12 @@ impl PersistedStore {
             next_version: 2,
         }
     }
+    #[allow(dead_code)]
     pub(crate) fn versions(&self) -> &[VersionedSnapshot] {
         &self.versions
     }
 
+    #[allow(dead_code)]
     pub(crate) fn prune_to_latest(&mut self, keep: usize) {
         if keep == 0 {
             self.versions.clear();
@@ -438,6 +442,7 @@ impl PersistedStore {
             .unwrap_or(1);
     }
 
+    #[allow(dead_code)]
     pub(crate) fn delta_for(&self, version: u64) -> Option<&SnapshotDeltaEntry> {
         self.deltas.iter().find(|entry| entry.version == version)
     }

@@ -18,7 +18,7 @@ pub fn handle_init(args: InitArgs) -> PrismResult<()> {
     // 1. Ensure config dirs
     let _config_dir = ensure_config_dir()?;
     let _user_dir = user_themes_dir()?;
-    println!("{} {}", "✔".green(), "Configuration directories ready.");
+    println!("{} Configuration directories ready.", "✔".green());
 
     // 2. Detect shell and RC file
     let shell = detect_shell()?;
@@ -139,9 +139,7 @@ fn append_prism_block(path: &Path, shell: &str) -> PrismResult<()> {
     let mut file = fs::OpenOptions::new().append(true).open(path)?;
 
     let block = match shell {
-        "fish" => format!(
-            "\n# Prism Terminal\nif test -f \"$HOME/.config/prism/prism.fish\"\n    source \"$HOME/.config/prism/prism.fish\"\nend\n"
-        ),
+        "fish" => "\n# Prism Terminal\nif test -f \"$HOME/.config/prism/prism.fish\"\n    source \"$HOME/.config/prism/prism.fish\"\nend\n".to_string(),
         _ => format!(
             "\n# Prism Terminal\nif [ -f \"$HOME/.config/prism/prism.{}\" ]; then\n    source \"$HOME/.config/prism/prism.{}\"\nfi\n",
             shell, shell

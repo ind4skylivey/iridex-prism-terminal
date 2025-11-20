@@ -3,8 +3,6 @@ use colored::Colorize;
 
 use crate::catalog::{load_catalog, CatalogEntry, ThemeCatalog};
 use crate::error::{PrismError, PrismResult};
-use crate::themes::ThemeId;
-use crate::{ensure_config_dir, user_themes_dir};
 
 pub mod apply;
 pub mod dev;

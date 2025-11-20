@@ -317,6 +317,5 @@ pub fn normalize_theme_key(value: &str) -> String {
     value
         .trim()
         .to_lowercase()
-        .replace('_', "-")
-        .replace(' ', "-")
+        .replace(['_', ' '], "-")
 }

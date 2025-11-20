@@ -30,6 +30,10 @@ impl ThemeCatalog {
         self.entries.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.entries.is_empty()
+    }
+
     pub fn resolve(&self, query: &str) -> Option<&CatalogEntry> {
         let key = normalize_theme_key(query);
         self.slug_index.get(&key).map(|index| &self.entries[*index])

@@ -2,7 +2,7 @@ use crate::ensure_config_dir;
 use crate::error::{PrismError, PrismResult};
 use crate::themes::{ScriptAsset, Theme};
 use std::fs;
-use std::path::PathBuf;
+use std::path::Path;
 
 pub fn apply_theme(theme: &Theme) -> PrismResult<()> {
     let config_dir = ensure_config_dir()?;
@@ -15,7 +15,7 @@ pub fn apply_theme(theme: &Theme) -> PrismResult<()> {
     Ok(())
 }
 
-fn apply_for_shell(theme: &Theme, shell: &str, config_dir: &PathBuf) -> PrismResult<()> {
+fn apply_for_shell(theme: &Theme, shell: &str, config_dir: &Path) -> PrismResult<()> {
     let target_path = config_dir.join(format!("prism.{}", shell));
 
     // Get the asset for this shell
@@ -54,7 +54,7 @@ fn generate_script(theme: &Theme, shell: &str) -> PrismResult<String> {
     // We assume accents[0] is primary, [1] secondary, [2] accent
     // If not present, fallback to base colors
     let p = &theme.palette;
-    let primary = p.accents.get(0).unwrap_or(&p.base[0]);
+    let primary = p.accents.first().unwrap_or(&p.base[0]);
     let secondary = p.accents.get(1).unwrap_or(&p.base[1]);
     let accent = p.accents.get(2).unwrap_or(&p.base[2]);
 
