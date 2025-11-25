@@ -1,4 +1,5 @@
 <div align="center">
+<img width="1024" height="1024" alt="banner" src="https://github.com/user-attachments/assets/72d0bacc-d2e5-410a-bd48-d35e71a8d77c" />
 
 # 🌈 Prism Terminal
 
