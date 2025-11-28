@@ -28,8 +28,17 @@ jobs:
       - name: Cargo test
         run: cargo test --all-targets --all-features
 
-      - name: Cargo bench (prompt subset)
-        run: cargo bench --bench prompt -- --sample-size=30 --measurement-time=2
+      - name: Cargo bench (prompt)
+        run: cargo bench --bench prompt -- --sample-size=50 --measurement-time=3
 
-      - name: Compare prompt benchmarks
+      - name: Cargo bench (dotfiles)
+        run: cargo bench --bench dotfiles -- --sample-size=50 --measurement-time=3
+
+      - name: Cargo bench (widgets)
+        run: cargo bench --bench widgets -- --sample-size=50 --measurement-time=3
+
+      - name: Cargo bench (gallery)
+        run: cargo bench --bench gallery -- --sample-size=50 --measurement-time=3
+
+      - name: Compare benchmarks
         run: scripts/bench-compare.sh --threshold 0.10

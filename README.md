@@ -7,10 +7,10 @@
 
 _Neon. Glitch. Cinema. Your shell, possessed on purpose._
 
-[![Made with Rust](https://img.shields.io/badge/Made%20with-Rust-orange?style=flat-square&logo=rust)](https://www.rust-lang.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
-[![Themes](https://img.shields.io/badge/Personas-20-ff69b4?style=flat-square)](themes/)
-[![Multi-Shell](https://img.shields.io/badge/Fish%20%7C%20Zsh%20%7C%20Bash-Supported-green?style=flat-square)]()
+[![Made with Rust](https://img.shields.io/badge/Made%20with-Rust-f46d25?style=flat&logo=rust&logoColor=ffffff&labelColor=0f172a)](https://www.rust-lang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-2563eb?style=flat&labelColor=0f172a)](LICENSE)
+[![Themes](https://img.shields.io/badge/Themes-20%20ready-ec4899?style=flat&labelColor=0f172a)](themes/)
+[![Shells](https://img.shields.io/badge/Shells-Fish%20%7C%20Zsh%20%7C%20Bash-22c55e?style=flat&labelColor=0f172a)]()
 
 [Install](#-install-prism-terminal) • [Gallery](#-20-personas-showcase) • [CLI](#️-gallery--cli) • [Roadmap](#-plan--the-ai-frontier)
 
@@ -38,11 +38,21 @@ cd iridex-prism-terminal/prism
 cargo install --path . --locked --force
 ```
 
+### macOS (Homebrew)
+
+```bash
+brew install rustup openssl@3 pkg-config
+rustup-init -y
+source "$HOME/.cargo/env"
+export PKG_CONFIG_PATH="$(brew --prefix openssl@3)/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+cargo install --path . --locked --force
+```
+
 ### Activation ritual
 
 ```bash
 prism init              # Auto-detects your shell (Fish/Zsh/Bash)
-prism list              # Browse 20 personas
+prism list              # Browse 20 themes
 prism apply cyber-noir  # Transform your terminal
 exec $SHELL             # Rebirth
 ```
@@ -58,9 +68,9 @@ export PATH=~/bin:$PATH
 
 ---
 
-## 🎭 20 Personas Showcase
+## 🎭 20 Themes Showcase
 
-Each persona is a **cinematic prompt** designed to possess your terminal:
+Each theme is a **cinematic prompt** designed to possess your terminal:
 
 ### 🌑 Eclipse-Protocol
 
