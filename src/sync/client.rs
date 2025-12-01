@@ -139,7 +139,8 @@ impl SyncClient {
             )
             .send()
             .await?;
-        if response.status() == StatusCode::CONFLICT {
+        let status = response.status();
+        if status == StatusCode::CONFLICT {
             let details = response.json::<ConflictPayload>().await.ok();
             let message = details
                 .as_ref()
@@ -150,7 +151,10 @@ impl SyncClient {
                 .unwrap_or_default();
             return Err(PrismError::new(format!("{message}{conflict_msg}")));
         }
-        let response = response.error_for_status()?;
+        if !status.is_success() {
+            let body = response.text().await.unwrap_or_default();
+            return Err(PrismError::new(format!("HTTP {status}: {body}")));
+        }
         let payload = response.json::<SyncPushResponse>().await?;
         Ok(payload)
     }

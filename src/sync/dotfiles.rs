@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::sync::{Mutex, OnceLock};
 use std::time::SystemTime;
 
 use chrono::{DateTime, Utc};
@@ -114,20 +115,73 @@ fn permission_string(_: &fs::Metadata) -> Option<String> {
 
 pub const EXCLUSIONS_FILE: &str = "dotfiles-exclusions.json";
 
-pub fn load_exclusions() -> PrismResult<Vec<String>> {
-    let path = exclusions_path()?;
-    if !path.exists() {
-        return Ok(vec![]);
+#[derive(Clone, Debug)]
+struct ExclusionsCache {
+    path: PathBuf,
+    modified: Option<SystemTime>,
+    len: u64,
+    values: Vec<String>,
+}
+
+impl ExclusionsCache {
+    fn empty() -> Self {
+        Self {
+            path: PathBuf::new(),
+            modified: None,
+            len: 0,
+            values: Vec::new(),
+        }
     }
-    let raw = fs::read_to_string(&path)?;
-    let entries: Vec<String> = serde_json::from_str(&raw).unwrap_or_else(|_| Vec::new());
+}
+
+static EXCLUSIONS_CACHE: OnceLock<Mutex<ExclusionsCache>> = OnceLock::new();
+
+fn normalize_exclusions(entries: impl IntoIterator<Item = String>) -> Vec<String> {
     let mut normalized = entries
         .into_iter()
         .map(|value| value.trim().to_string())
         .filter(|value| !value.is_empty())
         .collect::<Vec<_>>();
-    normalized.sort();
+    normalized.sort_unstable();
     normalized.dedup();
+    normalized
+}
+
+pub fn load_exclusions() -> PrismResult<Vec<String>> {
+    let path = exclusions_path()?;
+    if !path.exists() {
+        return Ok(vec![]);
+    }
+    let metadata = match fs::metadata(&path) {
+        Ok(meta) => meta,
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(vec![]),
+        Err(err) => return Err(err.into()),
+    };
+    let modified = metadata.modified().ok();
+    let len = metadata.len();
+
+    if let Some(cache) = EXCLUSIONS_CACHE.get() {
+        if let Ok(guard) = cache.lock() {
+            if guard.path == path && guard.len == len && guard.modified == modified {
+                return Ok(guard.values.clone());
+            }
+        }
+    }
+
+    let raw = fs::read(&path)?;
+    let entries: Vec<String> = serde_json::from_slice(&raw).unwrap_or_else(|_| Vec::new());
+    let normalized = normalize_exclusions(entries);
+
+    let cache = EXCLUSIONS_CACHE.get_or_init(|| Mutex::new(ExclusionsCache::empty()));
+    if let Ok(mut guard) = cache.lock() {
+        *guard = ExclusionsCache {
+            path: path.clone(),
+            modified,
+            len,
+            values: normalized.clone(),
+        };
+    }
+
     Ok(normalized)
 }
 
@@ -136,8 +190,23 @@ pub fn save_exclusions(exclusions: &[String]) -> PrismResult<()> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }
-    let serialized = serde_json::to_string_pretty(exclusions)?;
+    let normalized = normalize_exclusions(exclusions.iter().cloned());
+    let serialized = serde_json::to_string_pretty(&normalized)?;
     fs::write(&path, serialized)?;
+
+    if let Ok(metadata) = fs::metadata(&path) {
+        let modified = metadata.modified().ok();
+        let len = metadata.len();
+        let cache = EXCLUSIONS_CACHE.get_or_init(|| Mutex::new(ExclusionsCache::empty()));
+        if let Ok(mut guard) = cache.lock() {
+            *guard = ExclusionsCache {
+                path,
+                modified,
+                len,
+                values: normalized,
+            };
+        }
+    }
     Ok(())
 }
 

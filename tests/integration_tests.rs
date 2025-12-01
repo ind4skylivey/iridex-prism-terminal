@@ -24,9 +24,11 @@ fn with_isolated_env(test: impl FnOnce()) {
     let dir = tempfile::tempdir().expect("config dir");
     std::env::set_var("PRISM_CONFIG_DIR", dir.path());
     std::env::set_var("PRISM_DISABLE_SHELL_HOOKS", "1");
+    std::env::set_var("PRISM_SYNC_DISABLE_PERSIST", "1");
     test();
     std::env::remove_var("PRISM_CONFIG_DIR");
     std::env::remove_var("PRISM_DISABLE_SHELL_HOOKS");
+    std::env::remove_var("PRISM_SYNC_DISABLE_PERSIST");
 }
 
 fn make_dotfile(name: &str, contents: &str) -> prism::sync::client::DotfileRecord {

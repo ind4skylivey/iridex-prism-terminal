@@ -29,16 +29,37 @@ struct BackendState {
     secret: String,
     storage_path: PathBuf,
     data: Arc<RwLock<PersistedStore>>,
+    persist_enabled: bool,
 }
 
 impl BackendState {
+    fn in_memory(secret: String) -> Self {
+        Self {
+            secret,
+            storage_path: PathBuf::new(),
+            data: Arc::new(RwLock::new(PersistedStore::default())),
+            persist_enabled: false,
+        }
+    }
+
+    #[cfg(test)]
+    fn load(secret: String) -> PrismResult<Self> {
+        Ok(Self::in_memory(secret))
+    }
+
+    #[cfg(not(test))]
     fn load(secret: String) -> PrismResult<Self> {
         let path = metadata_dir()?.join(STORAGE_FILE);
         let store = read_store(&path)?;
+        let persist_enabled = !std::env::var("PRISM_SYNC_DISABLE_PERSIST")
+            .ok()
+            .map(|value| truthy(&value))
+            .unwrap_or(false);
         Ok(Self {
             secret,
             storage_path: path,
             data: Arc::new(RwLock::new(store)),
+            persist_enabled,
         })
     }
 
@@ -113,7 +134,9 @@ impl BackendState {
         let serialized = serde_json::to_string_pretty(&*guard)
             .map_err(|err| ApiError::from(PrismError::new(err.to_string())))?;
         drop(guard);
-        self.persist_serialized(&serialized).await?;
+        if self.persist_enabled {
+            self.persist_serialized(&serialized).await?;
+        }
         Ok(snapshot)
     }
 
@@ -142,7 +165,16 @@ pub async fn serve_with_listener<F>(
 where
     F: Future<Output = ()> + Send + 'static,
 {
-    let state = BackendState::load(secret)?;
+    let persist_disabled = std::env::var("PRISM_SYNC_DISABLE_PERSIST")
+        .ok()
+        .map(|value| truthy(&value))
+        .unwrap_or(false);
+    log::debug!("sync server persist_disabled={persist_disabled}");
+    let state = if persist_disabled {
+        BackendState::in_memory(secret)
+    } else {
+        BackendState::load(secret)?
+    };
     let app = Router::new()
         .route("/push", post(handle_push))
         .route("/pull", get(handle_pull))
@@ -308,6 +340,13 @@ pub fn reset_backend_store() -> PrismResult<()> {
         std::fs::remove_file(path)?;
     }
     Ok(())
+}
+
+fn truthy(value: &str) -> bool {
+    matches!(
+        value.trim().to_ascii_lowercase().as_str(),
+        "1" | "true" | "yes" | "on"
+    )
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

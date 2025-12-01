@@ -94,6 +94,7 @@ impl SpawnedServer {
 }
 
 async fn spawn_sync_server(secret: &str) -> PrismResult<SpawnedServer> {
+    std::env::set_var("PRISM_SYNC_DISABLE_PERSIST", "1");
     let _ = prism::sync::server::reset_backend_store();
     let listener = TcpListener::bind("127.0.0.1:0").await?;
     let addr = listener.local_addr()?;

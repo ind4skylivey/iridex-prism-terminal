@@ -736,20 +736,38 @@ pub mod bench_support {
             .collect()
     }
 
-    pub fn count_theme_matches(query: &str, themes: &[Theme]) -> usize {
-        let filter = GalleryFilter::parse(query);
+    #[derive(Clone)]
+    pub struct CompiledGalleryFilter(GalleryFilter);
+
+    pub fn compile_filter(query: &str) -> CompiledGalleryFilter {
+        CompiledGalleryFilter(GalleryFilter::parse(query))
+    }
+
+    pub fn count_theme_matches_compiled(filter: &CompiledGalleryFilter, themes: &[Theme]) -> usize {
         themes
             .iter()
-            .filter(|theme| filter.matches_theme(theme))
+            .filter(|theme| filter.0.matches_theme(theme))
             .count()
     }
 
-    pub fn count_community_matches(query: &str, entries: &[CommunityEntry]) -> usize {
-        let filter = GalleryFilter::parse(query);
+    pub fn count_community_matches_compiled(
+        filter: &CompiledGalleryFilter,
+        entries: &[CommunityEntry],
+    ) -> usize {
         entries
             .iter()
-            .filter(|entry| filter.matches_community(entry))
+            .filter(|entry| filter.0.matches_community(entry))
             .count()
+    }
+
+    pub fn count_theme_matches(query: &str, themes: &[Theme]) -> usize {
+        let filter = compile_filter(query);
+        count_theme_matches_compiled(&filter, themes)
+    }
+
+    pub fn count_community_matches(query: &str, entries: &[CommunityEntry]) -> usize {
+        let filter = compile_filter(query);
+        count_community_matches_compiled(&filter, entries)
     }
 }
 

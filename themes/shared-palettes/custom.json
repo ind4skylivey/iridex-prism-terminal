@@ -1,0 +1,11 @@
+{
+  "accent": "#bd93f9",
+  "bg": "#0b0b0b",
+  "description": "User-defined Prism palette",
+  "error": "#ff5555",
+  "fg": "#f8f8f2",
+  "name": "Custom",
+  "primary": "#ff79c6",
+  "secondary": "#8be9fd",
+  "success": "#50fa7b"
+}

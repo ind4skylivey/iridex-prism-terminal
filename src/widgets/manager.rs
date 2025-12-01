@@ -69,7 +69,43 @@ impl WidgetManager {
     }
 
     pub async fn render_all(&mut self, snapshot: &ContextSnapshot) -> PrismResult<Vec<String>> {
-        let mut outputs = Vec::with_capacity(self.widgets.len());
+        // For small widget sets, avoid task spawning overhead.
+        if self.widgets.len() <= 4 {
+            return self.render_all_sequential(snapshot).await;
+        }
+        self.render_all_concurrent(snapshot).await
+    }
+
+    async fn render_all_sequential(
+        &mut self,
+        snapshot: &ContextSnapshot,
+    ) -> PrismResult<Vec<String>> {
+        for managed in &mut self.widgets {
+            if !managed.should_render() {
+                continue;
+            }
+            let mut guard = managed.handle.lock().await;
+            if !guard.is_enabled() {
+                drop(guard);
+                managed.mark_disabled();
+                continue;
+            }
+            let start = Instant::now();
+            let output = guard.render(snapshot).await?;
+            let elapsed = start.elapsed();
+            drop(guard);
+            managed.apply_output(output);
+            if elapsed >= Duration::from_millis(250) {
+                log::debug!("Widget {} render took {:?}", managed.name, elapsed);
+            }
+        }
+        Ok(self.collect_outputs())
+    }
+
+    async fn render_all_concurrent(
+        &mut self,
+        snapshot: &ContextSnapshot,
+    ) -> PrismResult<Vec<String>> {
         let shared_snapshot = Arc::new(snapshot.clone());
         let mut join_set = JoinSet::new();
 
@@ -113,6 +149,11 @@ impl WidgetManager {
             }
         }
 
+        Ok(self.collect_outputs())
+    }
+
+    fn collect_outputs(&mut self) -> Vec<String> {
+        let mut outputs = Vec::with_capacity(self.widgets.len());
         for managed in &mut self.widgets {
             managed.advance_animation();
             if managed.enabled {
@@ -121,7 +162,7 @@ impl WidgetManager {
                 }
             }
         }
-        Ok(outputs)
+        outputs
     }
 
     pub fn from_names(names: &[String], config_dir: &Path) -> PrismResult<Self> {
