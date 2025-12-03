@@ -22,6 +22,11 @@ _Neon. Glitch. Cinema. Your shell, possessed on purpose._
 
 Prism Terminal is the **IRIDEX-inspired persona engine** from ind4skylivey. Every palette, prompt, and doc is drenched in neon, glitch, and cinematic energy so your shell feels **alive**, not boring.
 
+
+**Personal note**
+
+ - Completely available for homebrew [SOON] ... on progress. 
+
 - **Personas, not palettes** — Every catalog entry is a personality with intent, mood, voice, and a surprise element (animation, glyph cluster, UI twist)
 - **Gallery-grade confidence** — `prism preview` opens a Ratatui-powered gallery with filters, tabs, and hotkeys so you can **feel** a persona before applying it
 - **Multi-shell mobility** — Zsh, Fish, and Bash scripts share palettes and narratives. Your identity travels across shells without rewriting the story
