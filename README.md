@@ -75,6 +75,9 @@ export PATH=~/bin:$PATH
 
 ## 🎭 20 Themes Showcase
 
+<img width="866" height="654" alt="2025-12-03_16-17" src="https://github.com/user-attachments/assets/7b2db694-980c-4732-b7d8-29d1f476439e" />
+
+
 Each theme is a **cinematic prompt** designed to possess your terminal:
 
 ### 🌑 Eclipse-Protocol
