@@ -5,7 +5,8 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "PRISM: Terminal aesthetic manager with live preview, context-aware theming, widgets, and cloud sync"
 authors = ["ind4skylivey <dev@ind4skylivey.local>"]
-repository = "https://example.com/iridex"
+repository = "https://github.com/ind4skylivey/iridex-prism-terminal"
+homepage = "https://github.com/ind4skylivey/Prims-Terminal"
 
 [features]
 default = []
@@ -64,3 +65,8 @@ harness = false
 [[bench]]
 name = "gallery"
 harness = false
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
