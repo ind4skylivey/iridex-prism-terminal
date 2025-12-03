@@ -12,7 +12,7 @@ _Neon. Glitch. Cinema. Your shell, possessed on purpose._
 [![Themes](https://img.shields.io/badge/Themes-20%20ready-ec4899?style=flat&labelColor=0f172a)](themes/)
 [![Shells](https://img.shields.io/badge/Shells-Fish%20%7C%20Zsh%20%7C%20Bash-22c55e?style=flat&labelColor=0f172a)]()
 
-[Install](#-install-prism-terminal) • [Gallery](#-20-personas-showcase) • [CLI](#️-gallery--cli) • [Roadmap](#-plan--the-ai-frontier)
+[Install](#installation)  • [CLI](#️-gallery--cli) • [Roadmap](#-plan--the-ai-frontier)
 
 </div>
 
