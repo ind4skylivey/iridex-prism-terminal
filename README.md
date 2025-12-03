@@ -35,40 +35,45 @@ Prism Terminal is the **IRIDEX-inspired persona engine** from ind4skylivey. Ever
 
 ---
 
-## 🚀 Install Prism Terminal
+## Installation
+Your terminal, your prism—pick the path that fits your stack.
 
+### Homebrew (macOS & Linux)
+Fastest way; keeps updates painless via `brew`.
 ```bash
-git clone https://github.com/ind4skylivey/iridex-prism-terminal
+brew tap ind4skylivey/tap
+brew install ind4skylivey/tap/prism-terminal
+```
+If the tap is already added:
+```bash
+brew install ind4skylivey/tap/prism-terminal
+```
+Verification:
+```bash
+prism --version
+```
+
+### Prebuilt binaries (GitHub Releases)
+Ideal when you want a zero-build drop-in binary.
+1. Open the latest release: https://github.com/ind4skylivey/iridex-prism-terminal/releases/latest  
+2. Download the archive for your platform.  
+3. Extract it and move the `prism` binary somewhere on your `PATH`.
+```bash
+sudo mv prism /usr/local/bin/
+prism --version
+```
+
+### Install via Cargo
+Use this if you prefer Rust toolchains or pinned source builds.
+From crates.io (when published):
+```bash
+cargo install prism-terminal
+```
+From the repository source:
+```bash
+git clone https://github.com/ind4skylivey/iridex-prism-terminal.git
 cd iridex-prism-terminal/prism
-cargo install --path . --locked --force
-```
-
-### macOS (Homebrew)
-
-```bash
-brew install rustup openssl@3 pkg-config
-rustup-init -y
-source "$HOME/.cargo/env"
-export PKG_CONFIG_PATH="$(brew --prefix openssl@3)/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
-cargo install --path . --locked --force
-```
-
-### Activation ritual
-
-```bash
-prism init              # Auto-detects your shell (Fish/Zsh/Bash)
-prism list              # Browse 20 themes
-prism apply cyber-noir  # Transform your terminal
-exec $SHELL             # Rebirth
-```
-
-For quick iterations:
-
-```bash
-cargo build --release
-mkdir -p ~/bin
-cp target/release/prism ~/bin/prism
-export PATH=~/bin:$PATH
+cargo install --path .
 ```
 
 ---
