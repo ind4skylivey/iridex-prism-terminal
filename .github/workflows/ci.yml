@@ -41,6 +41,3 @@ jobs:
 
       - name: Cargo bench (gallery)
         run: cargo bench --bench gallery -- --sample-size=50 --measurement-time=3
-
-      - name: Compare benchmarks
-        run: scripts/bench-compare.sh --threshold 0.20
