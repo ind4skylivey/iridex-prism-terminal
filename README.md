@@ -8,7 +8,7 @@
 _Neon. Glitch. Cinema. Your shell, possessed on purpose._
 
 [![Made with Rust](https://img.shields.io/badge/Made%20with-Rust-f46d25?style=flat&logo=rust&logoColor=ffffff&labelColor=0f172a)](https://www.rust-lang.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-2563eb?style=flat&labelColor=0f172a)](LICENSE)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
 [![Themes](https://img.shields.io/badge/Themes-20%20ready-ec4899?style=flat&labelColor=0f172a)](themes/)
 [![Shells](https://img.shields.io/badge/Shells-Fish%20%7C%20Zsh%20%7C%20Bash-22c55e?style=flat&labelColor=0f172a)]()
 
@@ -532,9 +532,7 @@ Prism stands on the shoulders of giants:
 
 ## 📜 License
 
-MIT License — See [LICENSE](LICENSE) for details.
-
-**TL;DR:** Possess this software however you want. Just keep the license notice.
+Licensed under [GPL-3.0-only](LICENSE).
 
 ---
 

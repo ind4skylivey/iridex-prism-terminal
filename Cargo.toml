@@ -2,7 +2,7 @@
 name = "prism"
 version = "0.1.1"
 edition = "2021"
-license = "MIT OR Apache-2.0"
+license = "GPL-3.0-only"
 description = "PRISM: Terminal aesthetic manager with live preview, context-aware theming, widgets, and cloud sync"
 authors = ["ind4skylivey <dev@ind4skylivey.local>"]
 repository = "https://github.com/ind4skylivey/iridex-prism-terminal"
